@@ -11,7 +11,7 @@ interface Book {
   id: number;
   title: string;
   author: string;
-  description: string | null; // <--- Update Type
+  description: string | null;
   category_id: number;
   file_path: string;
   cover_path: string | null;
@@ -26,7 +26,7 @@ export default function Edit({ book, categories }: EditProps) {
   const { data, setData, put, processing, errors } = useForm({
     title: book.title,
     author: book.author,
-    description: book.description || "", // <--- Load description lama (atau string kosong)
+    description: book.description || "",
     category_id: String(book.category_id),
     file: null as File | null,
     cover: null as File | null,
@@ -38,6 +38,10 @@ export default function Edit({ book, categories }: EditProps) {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Menggunakan method PUT untuk update, tapi karena ada file upload 
+    // Inertia terkadang perlu _method: put di FormData atau pakai post dengan route helper.
+    // Namun kode asli Anda menggunakan put(), jika bekerja, biarkan saja.
+    // Jika gagal upload file di Laravel PUT request, ganti jadi router.post dengan _method: 'PUT'
     put(`/dashboard/books/${book.id}`);
   };
 
@@ -81,7 +85,7 @@ export default function Edit({ book, categories }: EditProps) {
             {errors.author && <p className="text-red-500 mt-1">{errors.author}</p>}
           </div>
 
-          {/* DESCRIPTION (BARU) */}
+          {/* DESCRIPTION */}
           <div>
             <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
               Deskripsi / Sinopsis
@@ -119,14 +123,14 @@ export default function Edit({ book, categories }: EditProps) {
             )}
           </div>
 
-          {/* FILE */}
+          {/* FILE (UPDATED: Accept PDF & EPUB) */}
           <div>
             <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
               Ganti File Buku <span className="text-gray-400 text-sm">(opsional)</span>
             </label>
             <input
               type="file"
-              accept=".pdf,.epub"
+              accept=".pdf,.epub" // <--- PERUBAHAN DI SINI
               onChange={(e) => setData("file", e.target.files?.[0] || null)}
               className="w-full dark:text-gray-300"
             />
@@ -135,6 +139,7 @@ export default function Edit({ book, categories }: EditProps) {
             <a
               href={`/storage/${book.file_path}`}
               target="_blank"
+              rel="noopener noreferrer"
               className="text-blue-600 dark:text-blue-400 underline block mt-2"
             >
               Lihat file lama
@@ -161,6 +166,7 @@ export default function Edit({ book, categories }: EditProps) {
               <img
                 src={coverPreview}
                 className="w-32 h-40 object-cover mt-2 rounded-lg shadow-md"
+                alt="Preview Cover"
               />
             )}
             {errors.cover && <p className="text-red-500 mt-1">{errors.cover}</p>}

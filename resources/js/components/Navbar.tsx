@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 interface User {
     name: string;
     email?: string;
-    avatar?: string; // Optional avatar url
+    avatar?: string; 
 }
 
 interface NavbarProps {
@@ -15,7 +15,7 @@ interface NavbarProps {
     };
 }
 
-// --- ICONS (Uniform Stroke & Size) ---
+// --- ICONS (Minimalis & Konsisten) ---
 const Icons = {
     Sun: ({ className }: { className?: string }) => (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
@@ -28,9 +28,6 @@ const Icons = {
     ),
     Close: ({ className }: { className?: string }) => (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-    ),
-    User: ({ className }: { className?: string }) => (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     ),
     Logout: ({ className }: { className?: string }) => (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
@@ -48,14 +45,14 @@ const Icons = {
 
 // --- COMPONENT: DESKTOP NAV LINK ---
 const NavLink = ({ href, children, active }: { href: string; children: React.ReactNode; active: boolean }) => (
-    <Link href={href} className="relative px-4 py-2 text-sm font-medium transition-colors">
-        <span className={`relative z-10 transition-colors duration-200 ${active ? "text-indigo-600 dark:text-indigo-400" : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"}`}>
+    <Link href={href} className="relative px-3 py-1.5 text-sm font-medium transition-colors group">
+        <span className={`relative z-10 transition-colors duration-200 ${active ? "text-zinc-900 dark:text-white" : "text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-200"}`}>
             {children}
         </span>
         {active && (
             <motion.div
-                layoutId="navbar-active-pill"
-                className="absolute inset-0 bg-indigo-50 dark:bg-indigo-500/10 rounded-full -z-0"
+                layoutId="navbar-indicator"
+                className="absolute inset-x-0 -bottom-3 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full"
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
             />
         )}
@@ -68,11 +65,11 @@ const MobileNavLink = ({ href, children, active, icon: Icon }: { href: string; c
         href={href}
         className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
             active
-                ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400"
-                : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100"
+                ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white"
+                : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-200"
         }`}
     >
-        {Icon && <Icon className="w-4 h-4" />}
+        {Icon && <Icon className={`w-4 h-4 ${active ? "text-indigo-600 dark:text-indigo-400" : ""}`} />}
         {children}
     </Link>
 );
@@ -86,7 +83,6 @@ export default function Navbar({ auth }: NavbarProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
-    // Handle Theme
     useEffect(() => {
         const saved = localStorage.getItem("theme");
         const isDark = saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches);
@@ -94,9 +90,8 @@ export default function Navbar({ auth }: NavbarProps) {
         document.documentElement.classList.toggle("dark", isDark);
     }, []);
 
-    // Handle Scroll Effect
     useEffect(() => {
-        const handleScroll = () => setScrolled(window.scrollY > 20);
+        const handleScroll = () => setScrolled(window.scrollY > 10);
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
@@ -116,74 +111,60 @@ export default function Navbar({ auth }: NavbarProps) {
     const isActive = (path: string) => url === path || url.startsWith(path + '/');
 
     return (
-        <header className="fixed top-0 inset-x-0 z-50 flex justify-center pointer-events-none px-4 pt-4 md:pt-6">
+        <header className={`fixed top-0 inset-x-0 z-50 flex justify-center transition-all duration-300 ${scrolled ? "pt-2 px-2" : "pt-0 px-0"}`}>
             <motion.nav
-                initial={{ y: -100, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                initial={{ y: -100 }}
+                animate={{ y: 0 }}
                 className={`
-                    pointer-events-auto w-full max-w-5xl rounded-2xl border transition-all duration-300
-                    ${scrolled || mobileMenuOpen
-                        ? "bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl border-zinc-200/50 dark:border-zinc-700/50 shadow-xl shadow-zinc-200/20 dark:shadow-black/40"
-                        : "bg-white/70 dark:bg-zinc-900/70 backdrop-blur-lg border-transparent shadow-sm"
+                    w-full max-w-7xl transition-all duration-300
+                    ${scrolled 
+                        ? "bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm rounded-2xl" 
+                        : "bg-white/0 dark:bg-zinc-900/0 backdrop-blur-none border-b border-transparent" // Transparent at top
                     }
+                    ${!scrolled && "border-b border-zinc-100 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 backdrop-blur-sm"} // Line when not scrolled but not floating
                 `}
             >
-                <div className="px-5 h-16 flex items-center justify-between">
+                <div className="px-4 md:px-6 h-16 flex items-center justify-between">
                     
                     {/* --- LEFT: LOGO --- */}
-                    <Link href="/" className="flex items-center gap-2.5 group outline-none">
-                        <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-all duration-300 group-hover:scale-105">
-                            <span className="text-white font-bold text-lg">L</span>
-                        </div>
-                        <span className="font-bold text-lg tracking-tight text-zinc-800 dark:text-zinc-100">
-                            Litera.id
-                        </span>
-                    </Link>
+                    <div className="flex items-center gap-8">
+                        <Link href="/" className="flex items-center gap-2 group outline-none">
+                            <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 transition-transform group-hover:scale-105">
+                                <span className="font-bold text-lg">L</span>
+                            </div>
+                            <span className="font-bold text-lg tracking-tight text-zinc-900 dark:text-white">
+                                Litera
+                            </span>
+                        </Link>
 
-                    {/* --- CENTER: DESKTOP MENU --- */}
-                    <div className="hidden md:flex items-center gap-1 bg-zinc-100/50 dark:bg-zinc-800/50 p-1 rounded-full border border-zinc-200/50 dark:border-zinc-700/50">
-                        <NavLink href="/" active={url === "/"}>Home</NavLink>
-                        <NavLink href="/books" active={isActive("/books")}>Buku</NavLink>
-                        <NavLink href="/categories" active={isActive("/categories")}>Kategori</NavLink>
+                        {/* Desktop Menu (Clean Links) */}
+                        <div className="hidden md:flex items-center gap-6">
+                            <NavLink href="/" active={url === "/"}>Home</NavLink>
+                            <NavLink href="/books" active={isActive("/books")}>Buku</NavLink>
+                            <NavLink href="/categories" active={isActive("/categories")}>Kategori</NavLink>
+                        </div>
                     </div>
 
                     {/* --- RIGHT: ACTIONS --- */}
-                    <div className="hidden md:flex items-center gap-3">
-                        {/* Theme Toggle */}
+                    <div className="hidden md:flex items-center gap-4">
+                        {/* Theme Toggle (Simple Icon) */}
                         <button
                             onClick={toggleDarkMode}
-                            className="p-2 rounded-full text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 transition-all active:scale-95"
+                            className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
                             aria-label="Toggle Theme"
                         >
                             {darkMode ? <Icons.Moon className="w-5 h-5" /> : <Icons.Sun className="w-5 h-5" />}
                         </button>
 
-                        {/* Bookmark Icon (Only if Logged In) */}
-                        {auth.user && (
-                            <Link
-                                href="/bookmarks"
-                                className={`p-2 rounded-full transition-all active:scale-95 relative group ${
-                                    isActive("/bookmarks")
-                                        ? "text-indigo-600 bg-indigo-50 dark:bg-indigo-500/20 dark:text-indigo-400"
-                                        : "text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
-                                }`}
-                                title="Bookmark Saya"
-                            >
-                                <Icons.Bookmark className="w-5 h-5" />
-                                {isActive("/bookmarks") && <span className="absolute top-2 right-2 w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>}
-                            </Link>
-                        )}
+                        <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-800"></div>
 
-                        <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-700"></div>
-
-                        {/* Auth Buttons / User Dropdown */}
+                        {/* Auth Section */}
                         {!auth.user ? (
-                            <div className="flex items-center gap-2">
-                                <Link href="/login" className="px-4 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors">
+                            <div className="flex items-center gap-3">
+                                <Link href="/login" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors">
                                     Log in
                                 </Link>
-                                <Link href="/register" className="px-4 py-2 text-sm font-medium text-white bg-zinc-900 dark:bg-white dark:text-zinc-900 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all">
+                                <Link href="/register" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 rounded-lg shadow-md shadow-indigo-500/20 transition-all hover:-translate-y-0.5">
                                     Sign up
                                 </Link>
                             </div>
@@ -191,53 +172,41 @@ export default function Navbar({ auth }: NavbarProps) {
                             <div className="relative">
                                 <button
                                     onClick={() => setDropdownOpen(!dropdownOpen)}
-                                    className={`flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border transition-all active:scale-95 ${
-                                        dropdownOpen 
-                                        ? "border-indigo-500/50 bg-indigo-50/50 dark:bg-indigo-900/20" 
-                                        : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 bg-white dark:bg-zinc-800"
-                                    }`}
+                                    className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                 >
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-inner">
+                                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">
                                         {auth.user.name.charAt(0).toUpperCase()}
                                     </div>
-                                    <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200 max-w-[80px] truncate">
-                                        {auth.user.name.split(" ")[0]}
-                                    </span>
-                                    <Icons.ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+                                    <Icons.ChevronDown className={`w-3 h-3 text-zinc-400 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
                                 </button>
 
-                                {/* Dropdown */}
+                                {/* Dropdown Menu */}
                                 <AnimatePresence>
                                     {dropdownOpen && (
                                         <motion.div
                                             initial={{ opacity: 0, y: 8, scale: 0.95 }}
                                             animate={{ opacity: 1, y: 0, scale: 1 }}
                                             exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                                            transition={{ duration: 0.15, ease: "easeOut" }}
-                                            className="absolute right-0 mt-2 w-56 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-100 dark:border-zinc-800 overflow-hidden py-2 z-50 ring-1 ring-black/5"
+                                            transition={{ duration: 0.15 }}
+                                            className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-zinc-100 dark:border-zinc-800 overflow-hidden py-1 z-50 origin-top-right"
                                         >
-                                            <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800 mb-1">
-                                                <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Signed in as</p>
-                                                <p className="text-sm font-bold text-zinc-900 dark:text-white truncate">{auth.user.name}</p>
+                                            <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+                                                <p className="text-xs font-medium text-zinc-400">Halo,</p>
+                                                <p className="text-sm font-semibold text-zinc-900 dark:text-white truncate">{auth.user.name.split(" ")[0]}</p>
                                             </div>
                                             
-                                            <div className="px-1">
-                                                <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors">
-                                                    <Icons.Dashboard className="w-4 h-4" />
-                                                    Dashboard
+                                            <div className="py-1">
+                                                <Link href="/dashboard" className="flex items-center gap-2 px-4 py-2 text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+                                                    <Icons.Dashboard className="w-4 h-4" /> Dashboard
                                                 </Link>
-                                                <Link href="/bookmarks" className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors">
-                                                    <Icons.Bookmark className="w-4 h-4" />
-                                                    Bookmark Saya
+                                                <Link href="/bookmarks" className="flex items-center gap-2 px-4 py-2 text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+                                                    <Icons.Bookmark className="w-4 h-4" /> Bookmarks
                                                 </Link>
                                             </div>
 
-                                            <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-1"></div>
-                                            
-                                            <div className="px-1">
-                                                <button onClick={handleLogout} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors text-left">
-                                                    <Icons.Logout className="w-4 h-4" />
-                                                    Log out
+                                            <div className="border-t border-zinc-100 dark:border-zinc-800 py-1">
+                                                <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors text-left">
+                                                    <Icons.Logout className="w-4 h-4" /> Log out
                                                 </button>
                                             </div>
                                         </motion.div>
@@ -247,64 +216,45 @@ export default function Navbar({ auth }: NavbarProps) {
                         )}
                     </div>
 
-                    {/* --- MOBILE HAMBURGER --- */}
-                    <div className="flex items-center gap-3 md:hidden">
-                        <button
-                            onClick={toggleDarkMode}
-                            className="p-2 rounded-full text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 active:scale-95 transition"
-                        >
+                    {/* --- MOBILE TOGGLE --- */}
+                    <div className="flex items-center gap-4 md:hidden">
+                        <button onClick={toggleDarkMode} className="text-zinc-500 dark:text-zinc-400">
                             {darkMode ? <Icons.Moon className="w-5 h-5" /> : <Icons.Sun className="w-5 h-5" />}
                         </button>
-
-                        <button
-                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className="p-2 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors active:scale-95"
-                        >
+                        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-zinc-800 dark:text-zinc-200">
                             {mobileMenuOpen ? <Icons.Close className="w-6 h-6" /> : <Icons.Menu className="w-6 h-6" />}
                         </button>
                     </div>
                 </div>
 
-                {/* --- MOBILE MENU (Accordion) --- */}
+                {/* --- MOBILE MENU --- */}
                 <AnimatePresence>
                     {mobileMenuOpen && (
                         <motion.div
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }} // Apple-like ease
-                            className="overflow-hidden border-t border-zinc-100 dark:border-zinc-800 md:hidden bg-zinc-50/50 dark:bg-black/20 backdrop-blur-sm"
+                            className="overflow-hidden border-t border-zinc-100 dark:border-zinc-800 md:hidden bg-white dark:bg-zinc-900"
                         >
-                            <div className="p-4 space-y-2">
+                            <div className="p-4 space-y-1">
                                 <MobileNavLink href="/" active={url === "/"} icon={Icons.Dashboard}>Home</MobileNavLink>
-                                <MobileNavLink href="/books" active={isActive("/books")} icon={({className}:{className?:string}) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>}>Buku</MobileNavLink>
-                                <MobileNavLink href="/categories" active={isActive("/categories")} icon={({className}:{className?:string}) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>}>Kategori</MobileNavLink>
+                                <MobileNavLink href="/books" active={isActive("/books")} icon={({className}:{className?:string})=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>}>Buku</MobileNavLink>
                                 
-                                <div className="h-px bg-zinc-200 dark:bg-zinc-700 my-2 mx-4"></div>
+                                <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-2"></div>
                                 
                                 {!auth.user ? (
                                     <div className="grid grid-cols-2 gap-3 pt-2">
-                                        <Link href="/login" className="flex justify-center px-4 py-3 rounded-xl border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-200 font-bold text-sm active:scale-95 transition">
-                                            Log in
-                                        </Link>
-                                        <Link href="/register" className="flex justify-center px-4 py-3 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold text-sm shadow-lg active:scale-95 transition">
-                                            Sign up
-                                        </Link>
+                                        <Link href="/login" className="flex justify-center px-4 py-2.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium text-sm">Log in</Link>
+                                        <Link href="/register" className="flex justify-center px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium text-sm">Sign up</Link>
                                     </div>
                                 ) : (
-                                    <div className="space-y-2">
-                                        <div className="px-4 py-2 text-xs font-bold text-zinc-400 uppercase tracking-wider">Akun</div>
+                                    <>
                                         <MobileNavLink href="/dashboard" active={isActive("/dashboard")} icon={Icons.Dashboard}>Dashboard</MobileNavLink>
-                                        <MobileNavLink href="/bookmarks" active={isActive("/bookmarks")} icon={Icons.Bookmark}>Bookmark Saya</MobileNavLink>
-                                        
-                                        <button
-                                            onClick={handleLogout}
-                                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-left"
-                                        >
-                                            <Icons.Logout className="w-4 h-4" />
-                                            Log out
+                                        <MobileNavLink href="/bookmarks" active={isActive("/bookmarks")} icon={Icons.Bookmark}>Bookmarks</MobileNavLink>
+                                        <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-left">
+                                            <Icons.Logout className="w-4 h-4" /> Log out
                                         </button>
-                                    </div>
+                                    </>
                                 )}
                             </div>
                         </motion.div>

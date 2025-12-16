@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Models\Category;
 use App\Models\ReadingProgress;
-use App\Models\Rating; // Import Model Rating
+use App\Models\Rating;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
@@ -63,12 +63,14 @@ class BookController extends Controller
 
     public function store(Request $request)
     {
+        // --- UPDATED: Validasi menambahkan 'epub' ---
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'author' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
-            'file' => 'required|file|mimes:pdf|max:51200',
+            // Menambahkan 'epub' ke dalam mimes
+            'file' => 'required|file|mimes:pdf,epub|max:51200', 
             'cover' => 'nullable|image|max:2048',
         ]);
 
@@ -106,20 +108,19 @@ class BookController extends Controller
         // Ambil buku terkait (kategori sama, beda ID)
         $relatedBooks = Book::where('category_id', $book->category_id)
             ->where('id', '!=', $book->id)
-            ->withAvg('ratings', 'rating') // Tambahkan rating di related books juga
+            ->withAvg('ratings', 'rating')
             ->limit(10)
             ->get(['id', 'title', 'author', 'cover_path']);
 
         return Inertia::render('books/Show', [
             'book'          => $bookDetail,
             'relatedBooks'  => $relatedBooks,
-            'userRating'    => $userRating, // Kirim data rating user
+            'userRating'    => $userRating,
             'auth' => [
                 'user' => Auth::user(),
             ],
         ]);
     }
-
 
     public function edit(Book $book)
     {
@@ -131,17 +132,21 @@ class BookController extends Controller
 
     public function update(Request $request, Book $book)
     {
+        // --- UPDATED: Validasi menambahkan 'epub' ---
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'author' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
-            'file' => 'nullable|file|mimes:pdf|max:51200',
+            // Menambahkan 'epub' ke dalam mimes
+            'file' => 'nullable|file|mimes:pdf,epub|max:51200',
             'cover' => 'nullable|image|max:2048',
         ]);
 
         if ($request->hasFile('file')) {
+            // Hapus file lama
             Storage::disk('public')->delete($book->file_path);
+            // Simpan file baru (bisa PDF atau EPUB)
             $book->file_path = $request->file('file')->store('books', 'public');
         }
 
@@ -176,10 +181,11 @@ class BookController extends Controller
     }
 
     /**
-     * FITUR PDF READER
+     * FITUR READER (PDF & EPUB)
      */
     public function read(Book $book)
     {
+        // Default location (Halaman 1 untuk PDF, atau awal chapter untuk EPUB)
         $initialLocation = 1;
 
         if (Auth::check()) {
@@ -188,6 +194,7 @@ class BookController extends Controller
                 ->first();
 
             if ($progress && $progress->cfi) {
+                // CFI disimpan sebagai string di DB, frontend akan handle konversinya
                 $initialLocation = $progress->cfi;
             }
         }
@@ -204,7 +211,8 @@ class BookController extends Controller
     public function saveProgress(Request $request, $bookId)
     {
         $request->validate([
-            'cfi' => 'required',
+            // CFI bisa berupa angka (halaman PDF) atau string (lokasi EPUB)
+            'cfi' => 'required', 
         ]);
 
         ReadingProgress::updateOrCreate(
@@ -213,7 +221,8 @@ class BookController extends Controller
                 'book_id' => $bookId,
             ],
             [
-                'cfi' => (string) $request->cfi,
+                // Pastikan disimpan sebagai string agar fleksibel
+                'cfi' => (string) $request->cfi, 
             ]
         );
 
@@ -221,7 +230,7 @@ class BookController extends Controller
     }
 
     /**
-     * FITUR BERI RATING (Submit Rating)
+     * FITUR BERI RATING
      */
     public function rate(Request $request, Book $book)
     {
@@ -239,6 +248,6 @@ class BookController extends Controller
             ]
         );
 
-        return back(); // Kembali ke halaman sebelumnya
+        return back();
     }
 }

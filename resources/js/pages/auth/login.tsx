@@ -2,20 +2,19 @@ import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- IMPORTS DARI LOGIC BARU (Input 2) ---
-import { Form } from '@inertiajs/react'; // Pastikan library wrapper Form Anda mendukung render props
+// --- IMPORTS DARI LOGIC BARU ---
+import { Form } from '@inertiajs/react'; 
 import { store } from '@/routes/login';
 import { register } from '@/routes';
 import { request } from '@/routes/password';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 
-// --- GLOBAL TYPE (Jika diperlukan) ---
+// --- GLOBAL TYPE ---
 declare global {
     interface Window {
         route: (name: string, params?: any, absolute?: boolean) => string;
@@ -28,7 +27,7 @@ interface LoginProps {
     canRegister: boolean;
 }
 
-// --- ICONS (Dari Desain Lama) ---
+// --- ICONS ---
 const Icons = {
     Mail: ({ className }: { className?: string }) => (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
@@ -47,7 +46,7 @@ const Icons = {
     )
 };
 
-// --- ANIMATED ILLUSTRATION (Dari Desain Lama) ---
+// --- ANIMATED ILLUSTRATION ---
 const AnimatedBook = () => {
     return (
         <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-zinc-900">
@@ -127,7 +126,6 @@ const AnimatedBook = () => {
 };
 
 export default function Login({ status, canResetPassword, canRegister }: LoginProps) {
-    // State lokal hanya untuk UI (show/hide password), data form dihandle oleh `store`
     const [showPassword, setShowPassword] = useState(false);
 
     return (
@@ -178,7 +176,7 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                         )}
                     </AnimatePresence>
 
-                    {/* FORM COMPONENT (LOGIC BARU) */}
+                    {/* FORM COMPONENT */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -207,7 +205,6 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                                                 tabIndex={1}
                                                 autoComplete="email"
                                                 placeholder="nama@email.com"
-                                                // Override styling Input component agar muat dengan Icon di kiri (pl-10)
                                                 className="pl-10 h-11 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 focus-visible:ring-indigo-500"
                                             />
                                         </div>
@@ -222,7 +219,7 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                                                 <TextLink
                                                     href={request()}
                                                     className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
-                                                    tabIndex={5}
+                                                    tabIndex={4}
                                                 >
                                                     Lupa password?
                                                 </TextLink>
@@ -240,7 +237,6 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                                                 tabIndex={2}
                                                 autoComplete="current-password"
                                                 placeholder="••••••••"
-                                                // Override styling Input component
                                                 className="pl-10 pr-10 h-11 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 focus-visible:ring-indigo-500"
                                             />
                                             <button
@@ -254,24 +250,11 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                                         <InputError message={errors.password} />
                                     </div>
 
-                                    {/* Remember Me */}
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id="remember"
-                                            name="remember"
-                                            tabIndex={3}
-                                            className="rounded border-zinc-300 text-indigo-600 focus:ring-indigo-600 dark:border-zinc-700 dark:bg-zinc-900"
-                                        />
-                                        <Label htmlFor="remember" className="font-medium text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
-                                            Ingat saya di perangkat ini
-                                        </Label>
-                                    </div>
-
                                     {/* Submit Button */}
                                     <Button
                                         type="submit"
                                         disabled={processing}
-                                        tabIndex={4}
+                                        tabIndex={3}
                                         className="relative w-full h-auto inline-flex items-center justify-center rounded-xl bg-indigo-600 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-500/20 transition-all duration-200 hover:bg-indigo-700 hover:shadow-indigo-500/40 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 active:scale-95"
                                     >
                                         {processing ? (
@@ -313,7 +296,7 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                 </div>
             </div>
 
-            {/* --- RIGHT COLUMN: ANIMATED ARTWORK (Tetap sama persis) --- */}
+            {/* --- RIGHT COLUMN: ANIMATED ARTWORK --- */}
             <div className="hidden lg:flex relative flex-col justify-between bg-zinc-900 text-white overflow-hidden">
                 <AnimatedBook />
                 

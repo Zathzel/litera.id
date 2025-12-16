@@ -2,21 +2,29 @@ import DashboardLayout from "@/layouts/dashboard/DashboardLayout";
 import { Link, router, usePage } from "@inertiajs/react";
 import { useState } from "react";
 
+// --- Types ---
 interface Category {
   id: number;
   name: string;
 }
 
-interface IndexProps {
+interface PageProps {
   categories: Category[];
+  [key: string]: any;
 }
 
-export default function Index({ categories }: IndexProps) {
-  // --- PERBAIKAN TYPE ASSERION UNTUK MENGATASI ERROR TS 2322 ---
-  // Casting 'processing' sebagai boolean
+// --- Icons ---
+const Icons = {
+    Plus: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>,
+    Pencil: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>,
+    Trash: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>,
+    FolderOpen: () => <svg className="w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" /></svg>
+};
+
+export default function Index() {
+  const { categories } = usePage<PageProps>().props;
   const pageProps = usePage().props;
   const processing = pageProps.processing as boolean;
-  // -----------------------------------------------------------------
 
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
@@ -34,112 +42,117 @@ export default function Index({ categories }: IndexProps) {
 
   return (
     <DashboardLayout>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-          Daftar Kategori
-        </h1>
+      {/* --- Header Section --- */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+        <div>
+            <h1 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
+            📂 Daftar Kategori
+            </h1>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Atur pengelompokan buku untuk memudahkan pencarian.
+            </p>
+        </div>
 
         <Link
           href="/dashboard/categories/create"
-          className="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow-md transition duration-150 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+          className="group inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 transition-all duration-200 ease-in-out hover:-translate-y-0.5 active:scale-95"
         >
-          {/* Mengganti PlusIcon dengan karakter Unicode (+) */}
-          <span className="text-xl leading-none mr-2">+</span>
-          Tambah Kategori
+          <Icons.Plus />
+          <span>Tambah Kategori</span>
         </Link>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 shadow-xl rounded-xl overflow-hidden">
+      {/* --- Table Section --- */}
+      <div className="bg-white dark:bg-gray-800 shadow-xl shadow-gray-200/50 dark:shadow-none rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-700">
+            <thead className="bg-gray-50/50 dark:bg-gray-700/50">
               <tr>
-                <th className="w-16 px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  ID
+                <th className="w-20 px-6 py-4 text-left text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
+                  No.
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
                   Nama Kategori
                 </th>
-                <th className="w-36 px-6 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <th className="w-48 px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
                   Aksi
                 </th>
               </tr>
             </thead>
 
-            <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-              {categories.map((category) => (
-                <tr
-                  key={category.id}
-                  className="hover:bg-gray-100 dark:hover:bg-gray-700/50 transition duration-150 ease-in-out"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
-                    {category.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                    {category.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex justify-center items-center space-x-4">
-                      {/* Tombol Edit: Menggunakan karakter ✏️ (Pensil) */}
-                      <Link
-                        href={`/dashboard/categories/${category.id}/edit`}
-                        className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 transition duration-150 ease-in-out p-1 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 text-xl leading-none"
-                        title="Edit Kategori"
-                      >
-                        <span aria-label="Edit" role="img">✏️</span>
-                      </Link>
+            <tbody className="bg-white divide-y divide-gray-100 dark:divide-gray-700 dark:bg-gray-800">
+              {categories.length > 0 ? (
+                categories.map((category, index) => (
+                  <tr
+                    key={category.id}
+                    className="group hover:bg-indigo-50/30 dark:hover:bg-gray-700/30 transition-colors duration-150"
+                  >
+                    {/* Kolom Nomor Urut (index + 1) */}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500 dark:text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      {index + 1}
+                    </td>
 
-                      {/* Tombol Hapus */}
-                      <button
-                        onClick={() => handleDelete(category.id)}
-                        disabled={deletingId === category.id || processing}
-                        className={`text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition duration-150 ease-in-out p-1 rounded-full hover:bg-red-100 dark:hover:bg-gray-700 text-xl leading-none ${
-                          deletingId === category.id ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
-                        title="Hapus Kategori"
-                      >
-                        {deletingId === category.id ? (
-                          // Spinner tetap dipertahankan karena ini fungsionalitas UX
-                          <svg
-                            className="animate-spin h-5 w-5 text-red-600 dark:text-red-400"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            ></circle>
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                          </svg>
-                        ) : (
-                          // Mengganti TrashIcon dengan karakter Unicode 🗑️ (Tempat Sampah)
-                          <span aria-label="Hapus" role="img">🗑️</span>
-                        )}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    {/* Kolom Nama Kategori */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                        {category.name}
+                      </div>
+                    </td>
 
-              {/* Tampilan jika data kosong */}
-              {categories.length === 0 && (
+                    {/* Kolom Aksi */}
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <div className="flex justify-center items-center gap-2">
+                        {/* Tombol Edit */}
+                        <Link
+                          href={`/dashboard/categories/${category.id}/edit`}
+                          className="p-2 text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-white bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/50 rounded-lg transition-all"
+                          title="Edit Kategori"
+                        >
+                          <Icons.Pencil />
+                        </Link>
+
+                        {/* Tombol Hapus */}
+                        <button
+                          onClick={() => handleDelete(category.id)}
+                          disabled={deletingId === category.id || processing}
+                          className={`p-2 rounded-lg transition-all ${
+                            deletingId === category.id 
+                                ? "bg-red-50 text-red-400 cursor-not-allowed" 
+                                : "text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/50"
+                          }`}
+                          title="Hapus Kategori"
+                        >
+                          {deletingId === category.id ? (
+                            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                          ) : (
+                            <Icons.Trash />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                /* --- Empty State --- */
                 <tr>
-                  <td colSpan={3} className="px-6 py-12 text-center">
-                    <div className="text-xl font-medium text-gray-500 dark:text-gray-400">
-                      Belum ada kategori.
+                  <td colSpan={3} className="px-6 py-20 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <Icons.FolderOpen />
+                      <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">Belum ada kategori</h3>
+                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-sm">
+                        Buat kategori baru untuk mulai mengelompokkan buku.
+                      </p>
+                      <Link
+                        href="/dashboard/categories/create"
+                        className="mt-6 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
+                      >
+                        <Icons.Plus />
+                        <span className="ml-2">Buat Kategori</span>
+                      </Link>
                     </div>
-                    <p className="mt-2 text-sm text-gray-400 dark:text-gray-500">
-                      Klik tombol "Tambahl Kategori" untuk membuat yang pertama.
-                    </p>
                   </td>
                 </tr>
               )}

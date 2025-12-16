@@ -11,7 +11,7 @@ export default function Create({ categories }: { categories: Category[] }) {
   const { data, setData, post, errors, processing } = useForm({
     title: "",
     author: "",
-    description: "", // <--- Tambahkan state description
+    description: "",
     category_id: "",
     file: null as File | null,
     cover: null as File | null,
@@ -60,7 +60,7 @@ export default function Create({ categories }: { categories: Category[] }) {
             {errors.author && <p className="text-red-500 mt-1">{errors.author}</p>}
           </div>
 
-          {/* DESCRIPTION (BARU) */}
+          {/* DESCRIPTION */}
           <div>
             <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
               Deskripsi / Sinopsis
@@ -99,14 +99,14 @@ export default function Create({ categories }: { categories: Category[] }) {
             )}
           </div>
 
-          {/* FILE */}
+          {/* FILE (UPDATED: Accept PDF & EPUB) */}
           <div>
             <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
-              File Buku <span className="text-gray-400 text-sm">(PDF/EPUB)</span>
+              File Buku <span className="text-gray-400 text-sm">(.epub)</span>
             </label>
             <input
               type="file"
-              accept=".pdf,.epub"
+              accept=".pdf,.epub" // <--- PERUBAHAN DI SINI
               onChange={(e) => setData("file", e.target.files?.[0] || null)}
               className="w-full dark:text-gray-300"
             />
@@ -132,6 +132,7 @@ export default function Create({ categories }: { categories: Category[] }) {
               <img
                 src={coverPreview}
                 className="w-32 h-40 object-cover mt-2 rounded-lg shadow-md"
+                alt="Preview Cover"
               />
             )}
             {errors.cover && <p className="text-red-500 mt-1">{errors.cover}</p>}
