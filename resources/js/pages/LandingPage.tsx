@@ -1,285 +1,328 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useRef, useState } from "react";
+import { motion, useScroll, useTransform, useSpring, useMotionTemplate, useMotionValue } from "framer-motion";
 import { Link } from "@inertiajs/react";
-import PublicLayout from "../layouts/public/PublicLayout";
+import PublicLayout from "@/layouts/public/PublicLayout";
+// 1. IMPORT HOOK
+import useTranslation from "@/hooks/UseTranslation";
 
 // ==========================================
-// 1. ASET SVG & ILUSTRASI CUSTOM
+// 1. SUB-COMPONENTS & ASSETS
 // ==========================================
 
-// Ilustrasi Hero: Tablet E-Reader dengan elemen melayang (SVG Murni + Framer Motion)
-const HeroIllustration = () => (
-  <svg viewBox="0 0 500 500" className="w-full h-full drop-shadow-2xl">
-    {/* Floating Background Blob */}
-    <motion.path
-      animate={{ scale: [1, 1.1, 1], rotate: [0, 5, 0] }}
-      transition={{ duration: 10, repeat: Infinity }}
-      fill="#E0E7FF"
-      className="dark:fill-indigo-900/30"
-      d="M45.7,-76.3C58.9,-69.3,69.1,-56.3,76.3,-42.4C83.5,-28.5,87.7,-13.7,85.5,0.1C83.4,14,74.9,26.9,65.1,38.1C55.3,49.3,44.2,58.8,31.8,65.3C19.4,71.8,5.7,75.3,-7.4,74.1C-20.5,72.9,-33,67,-43.7,59.1C-54.4,51.2,-63.3,41.3,-70.3,29.2C-77.3,17.1,-82.4,2.8,-79.4,-10.2C-76.4,-23.2,-65.3,-34.9,-53.8,-42.9C-42.3,-50.9,-30.4,-55.2,-18.3,-57.4C-6.2,-59.6,6.1,-59.7,19.2,-59.7"
-      transform="translate(250 250) scale(2.5)"
-    />
-    {/* Device Body */}
-    <rect x="100" y="80" width="300" height="400" rx="30" className="fill-white dark:fill-gray-800" stroke="#4F46E5" strokeWidth="8" />
-    {/* Screen */}
-    <rect x="120" y="120" width="260" height="320" rx="10" className="fill-gray-100 dark:fill-gray-900" />
-    {/* Skeleton UI (Garis-garis teks) */}
-    <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ staggerChildren: 0.2 }}>
-       <rect x="140" y="150" width="100" height="20" rx="4" className="fill-gray-300 dark:fill-gray-700" />
-       <rect x="140" y="190" width="220" height="10" rx="4" className="fill-gray-300 dark:fill-gray-700" />
-       <rect x="140" y="210" width="200" height="10" rx="4" className="fill-gray-300 dark:fill-gray-700" />
-       <rect x="140" y="230" width="210" height="10" rx="4" className="fill-gray-300 dark:fill-gray-700" />
-       <rect x="140" y="270" width="220" height="10" rx="4" className="fill-gray-300 dark:fill-gray-700" />
-       <rect x="140" y="290" width="180" height="10" rx="4" className="fill-gray-300 dark:fill-gray-700" />
-    </motion.g>
-    {/* Floating Element: Book Icon */}
-    <motion.g animate={{ y: [-10, 10, -10] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
-       <circle cx="380" cy="150" r="40" className="fill-indigo-500 shadow-lg" />
-       <path d="M365 140L375 160L395 135" stroke="white" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-    </motion.g>
-    {/* Floating Element: Heart */}
-    <motion.g animate={{ y: [10, -10, 10] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}>
-       <circle cx="100" cy="350" r="30" className="fill-pink-500 shadow-lg" />
-       <text x="85" y="360" fill="white" fontSize="24">❤️</text>
-    </motion.g>
-  </svg>
-);
+// --- 3D BOOK COMPONENT (HERO) ---
+const Book3D = () => {
+  // 2. PANGGIL HOOK DI SUB-COMPONENT
+  const { t } = useTranslation();
+  
+  const ref = useRef<HTMLDivElement>(null);
+  
+  // Mouse Tilt Effect Logic
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const xSpring = useSpring(x, { stiffness: 300, damping: 30 });
+  const ySpring = useSpring(y, { stiffness: 300, damping: 30 });
+  const transform = useMotionTemplate`rotateX(${xSpring}deg) rotateY(${ySpring}deg)`;
 
-// Ikon Fitur
-const Icons = {
-  Moon: () => (
-    <svg className="w-8 h-8 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-    </svg>
-  ),
-  Search: () => (
-    <svg className="w-8 h-8 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-    </svg>
-  ),
-  Bookmark: () => (
-    <svg className="w-8 h-8 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-    </svg>
-  ),
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = (e.clientX - rect.left) * 32.5;
+    const mouseY = (e.clientY - rect.top) * 32.5;
+    const rX = (mouseY / height - 32.5 / 2) * -1;
+    const rY = (mouseX / width - 32.5 / 2);
+    x.set(rX);
+    y.set(rY);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div 
+        ref={ref}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        style={{ transformStyle: "preserve-3d", transform }}
+        className="relative w-64 h-80 md:w-80 md:h-[480px] cursor-pointer"
+    >
+        {/* Book Spine (Back) */}
+        <div className="absolute inset-0 bg-gray-900 rounded-r-xl transform translate-z-[-20px]" style={{ transform: 'translateZ(-25px)' }}></div>
+        
+        {/* Book Pages */}
+        <div className="absolute top-1 bottom-1 right-2 w-[40px] bg-white rounded-r-md" style={{ transform: 'rotateY(90deg) translateZ(-20px)' }}></div>
+        <div className="absolute top-1 bottom-1 right-2 w-full bg-white border-l border-gray-200 rounded-r-sm" style={{ transform: 'translateZ(-20px)' }}></div>
+
+        {/* Book Cover (Front) */}
+        <div className="absolute inset-0 bg-indigo-600 rounded-r-xl shadow-2xl overflow-hidden flex flex-col justify-between p-6 border-l-4 border-white/10" style={{ transform: 'translateZ(25px)' }}>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none"></div>
+            <div className="space-y-4 z-10">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-lg flex items-center justify-center text-white font-bold text-xl">L</div>
+                <h3 className="text-4xl font-black text-white leading-tight tracking-tighter">
+                    {/* [TRANSLATE] Stylized Text */}
+                    {t("FUTURE")}<br/>{t("READER")}
+                </h3>
+            </div>
+            <div className="z-10">
+                <div className="h-px w-full bg-white/30 mb-4"></div>
+                <p className="text-indigo-100 text-sm font-mono">{t("EDITION")} 2025</p>
+                <p className="text-white font-bold text-lg mt-1">Litera.id</p>
+            </div>
+            
+            {/* Glossy Reflection */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none"></div>
+        </div>
+    </motion.div>
+  );
 };
 
-// Background Grid Pattern
-const GridPattern = () => (
-  <svg className="absolute inset-0 -z-10 h-full w-full stroke-gray-200 dark:stroke-gray-800 [mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)]" aria-hidden="true">
-    <defs>
-      <pattern id="grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
-        <path d="M0 40L40 0H20L0 20M40 40V20L20 40" strokeWidth="2" fill="none" className="opacity-10" />
-      </pattern>
-    </defs>
-    <rect width="100%" height="100%" strokeWidth="0" fill="url(#grid-pattern)" />
-  </svg>
-);
+// --- SPOTLIGHT CARD (BENTO GRID) ---
+const SpotlightCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
 
-// ==========================================
-// 2. KOMPONEN DATA DUMMY (BUKU & MARQUEE)
-// ==========================================
+  function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
 
-const MockBook = ({ color, title, rotate }: { color: string; title: string; rotate: number }) => (
-  <motion.div
-    whileHover={{ y: -10, scale: 1.05, rotate: 0, zIndex: 10 }}
-    className={`relative w-32 h-48 rounded-r-md shadow-xl flex flex-col justify-between p-3 border-l-4 border-white/20 cursor-pointer transition-all duration-300`}
-    style={{ backgroundColor: color, rotate: `${rotate}deg`, boxShadow: '5px 5px 15px rgba(0,0,0,0.2)' }}
-  >
-    <div className="space-y-2">
-      <div className="w-full h-2 bg-white/30 rounded-full" />
-      <div className="w-3/4 h-2 bg-white/30 rounded-full" />
+  return (
+    <div
+      className={`group relative border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden ${className}`}
+      onMouseMove={handleMouseMove}
+    >
+      <motion.div
+        className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition duration-300 group-hover:opacity-100"
+        style={{
+          background: useMotionTemplate`
+            radial-gradient(
+              650px circle at ${mouseX}px ${mouseY}px,
+              rgba(99, 102, 241, 0.15),
+              transparent 80%
+            )
+          `,
+        }}
+      />
+      <div className="relative h-full">{children}</div>
     </div>
-    <div className="text-white/80 text-xs font-bold font-serif tracking-widest rotate-180 [writing-mode:vertical-lr] h-full max-h-[100px]">
-       {title}
-    </div>
-  </motion.div>
-);
+  );
+};
 
-const books = [
-  { color: "#4F46E5", title: "REACT", rotate: -3 },
-  { color: "#DB2777", title: "DESIGN", rotate: 2 },
-  { color: "#059669", title: "NATURE", rotate: -2 },
-  { color: "#D97706", title: "HISTORY", rotate: 3 },
-  { color: "#7C3AED", title: "MAGIC", rotate: -1 },
-  { color: "#2563EB", title: "CODING", rotate: 2 },
-  { color: "#DC2626", title: "DANGER", rotate: -3 },
-];
+// --- ICONS ---
+const Icons = {
+    Library: () => <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>,
+    Lightning: () => <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>,
+    Shield: () => <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>,
+    Device: () => <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+};
 
 // ==========================================
-// 3. MAIN COMPONENT: LANDING PAGE
+// 2. MAIN COMPONENT
 // ==========================================
 
-const LandingPage: React.FC = () => {
+export default function LandingPage() {
+  // 3. PANGGIL HOOK DI MAIN COMPONENT
+  const { t } = useTranslation();
+
+  const { scrollY } = useScroll();
+  const y1 = useTransform(scrollY, [0, 500], [0, 200]);
+  const y2 = useTransform(scrollY, [0, 500], [0, -150]);
+
   return (
     <PublicLayout>
-      <div className="relative overflow-hidden">
+      <div className="relative bg-white dark:bg-black overflow-hidden font-sans text-gray-900 dark:text-gray-100 transition-colors duration-500">
         
-        {/* --- BACKGROUND GLOBAL --- */}
-        <div className="absolute top-0 left-0 w-full h-full bg-white dark:bg-gray-900 transition-colors duration-300">
-            <GridPattern />
-            <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-96 h-96 bg-indigo-500/30 dark:bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 translate-y-12 -translate-x-12 w-96 h-96 bg-purple-500/30 dark:bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
+        {/* --- DYNAMIC BACKGROUND --- */}
+        <div className="fixed inset-0 z-0 pointer-events-none">
+            {/* Grid */}
+            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+            
+            {/* Floating Orbs */}
+            <motion.div style={{ y: y1 }} className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-500/30 rounded-full blur-[120px] mix-blend-multiply dark:mix-blend-screen" />
+            <motion.div style={{ y: y2 }} className="absolute top-[20%] right-[-5%] w-[400px] h-[400px] bg-indigo-500/30 rounded-full blur-[100px] mix-blend-multiply dark:mix-blend-screen" />
         </div>
 
-        {/* --- SECTION 1: HERO --- */}
-        <header className="relative z-10 flex flex-col md:flex-row items-center justify-between px-6 lg:px-12 py-20 lg:py-32 max-w-7xl mx-auto gap-12">
-          <div className="flex-1 text-center md:text-left space-y-8">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 text-indigo-600 dark:text-indigo-300 text-sm font-medium mb-6">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-                  </span>
-                  Perpustakaan Digital No. 1
-               </div>
-              <h2 className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-gray-900 dark:text-white tracking-tight">
-                Baca Buku Digital <br className="hidden lg:block" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
-                  Tanpa Batas.
-                </span>
-              </h2>
-            </motion.div>
-
-            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.6 }} className="text-lg md:text-xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-2xl mx-auto md:mx-0">
-              Akses ribuan buku PDF & EPUB dengan pengalaman membaca modern. Mode malam, pencarian cepat, dan sinkronisasi progres di semua perangkat.
-            </motion.p>
-
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.6 }} className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-              <Link href="/books" className="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-lg font-semibold shadow-lg shadow-indigo-500/30 hover:scale-105 transition-transform flex items-center justify-center gap-2">
-                 Mulai Membaca
-                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
-              </Link>
-              <Link href="/register" className="px-8 py-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white rounded-full text-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                Buat Akun Gratis
-              </Link>
-            </motion.div>
-          </div>
-
-          <motion.div initial={{ opacity: 0, scale: 0.8, rotate: 5 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ delay: 0.3, duration: 0.8 }} className="flex-1 w-full max-w-lg relative">
-             <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-full blur-[100px] opacity-20"></div>
-             <HeroIllustration />
-          </motion.div>
-        </header>
-
-        {/* --- WAVE DIVIDER SVG --- */}
-        <div className="relative -mt-20 z-20">
-           <svg className="w-full h-24 md:h-48 fill-gray-50 dark:fill-gray-800/50" viewBox="0 0 1440 320" preserveAspectRatio="none">
-              <path fillOpacity="1" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,250.7C960,235,1056,181,1152,165.3C1248,149,1344,171,1392,181.3L1440,192V320H1392C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320H0Z"></path>
-           </svg>
-        </div>
-
-        {/* --- SECTION 2: FEATURES --- */}
-        <section className="relative z-20 bg-gray-50 dark:bg-gray-800/50 py-20 px-6">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
-              <h3 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                Didesain untuk <span className="text-indigo-600 dark:text-indigo-400">Kenyamanan</span>
-              </h3>
-              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                Kami fokus pada hal-hal kecil yang membuat pengalaman membaca digital terasa seperti buku fisik.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[{ title: "Dark Mode Nyaman", desc: "Lindungi mata Anda saat membaca di malam hari.", icon: Icons.Moon },
-                { title: "Pencarian Cerdas", desc: "Temukan kutipan atau bab tertentu dalam hitungan detik.", icon: Icons.Search },
-                { title: "Simpan Progres", desc: "Lanjutkan membaca tepat di halaman terakhir Anda.", icon: Icons.Bookmark }
-              ].map((f, i) => (
-                <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ delay: i * 0.1, duration: 0.5 }} whileHover={{ y: -10 }}
-                  className="group bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-lg shadow-gray-200/50 dark:shadow-black/30 border border-gray-100 dark:border-gray-700 hover:border-indigo-500/30 transition-all duration-300"
+        {/* --- SECTION 1: HERO (IMPACT) --- */}
+        <section className="relative z-10 min-h-screen flex items-center pt-20">
+            <div className="max-w-7xl mx-auto px-6 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+                
+                {/* Text Content */}
+                <motion.div 
+                    initial={{ opacity: 0, x: -50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="space-y-8"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <f.icon />
-                  </div>
-                  <h4 className="text-xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-indigo-600 transition-colors">{f.title}</h4>
-                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{f.desc}</p>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 dark:bg-white/5 border border-indigo-100 dark:border-white/10 backdrop-blur-md shadow-sm">
+                        <span className="flex h-2 w-2 relative">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                        </span>
+                        {/* [TRANSLATE] Badge */}
+                        <span className="text-xs font-bold tracking-wide uppercase text-indigo-600 dark:text-indigo-300">{t("Future Reading Platform")}</span>
+                    </div>
+
+                    <h1 className="text-5xl md:text-7xl font-black leading-[1.1] tracking-tight">
+                        {/* [TRANSLATE] Headline */}
+                        {t("Knowledge")} <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 animate-gradient-x">
+                            {t("Limitless.")}
+                        </span>
+                    </h1>
+
+                    <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-lg leading-relaxed">
+                        {/* [TRANSLATE] Sub-headline */}
+                        {t("Access thousands of digital books, mark progress, and enjoy a reading experience designed for your visual comfort.")}
+                    </p>
+
+                    <div className="flex flex-wrap gap-4">
+                        <Link href="/books" className="group relative px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-full font-bold text-lg overflow-hidden shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1">
+                            <span className="relative z-10 flex items-center gap-2">
+                                {/* [TRANSLATE] Button 1 */}
+                                {t("Start Reading")} 
+                                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                            </span>
+                        </Link>
+                        <Link href="/register" className="px-8 py-4 bg-transparent border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-full font-bold text-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+                            {/* [TRANSLATE] Button 2 */}
+                            {t("Sign Up Free")}
+                        </Link>
+                    </div>
+
+                    <div className="pt-8 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                        <div className="flex -space-x-3">
+                            {[1,2,3,4].map(i => (
+                                <div key={i} className="w-10 h-10 rounded-full border-2 border-white dark:border-black bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-500">
+                                    {t("User")}
+                                </div>
+                            ))}
+                        </div>
+                        {/* [TRANSLATE] Social Proof */}
+                        <p>{t("Join 2,000+ other readers.")}</p>
+                    </div>
                 </motion.div>
-              ))}
+
+                {/* 3D Visual */}
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.8, rotateY: 30 }}
+                    animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+                    transition={{ duration: 1, delay: 0.2 }}
+                    className="flex justify-center perspective-1000"
+                >
+                    <div className="relative">
+                        {/* Glow Behind Book */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-indigo-500 rounded-full blur-[150px] opacity-40 animate-pulse"></div>
+                        <Book3D />
+                    </div>
+                </motion.div>
+
             </div>
-          </div>
         </section>
 
-        {/* --- SECTION 3: INFINITE BOOK SHELF (Marquee) --- */}
-        <section className="py-24 overflow-hidden bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
-            <div className="text-center mb-12 px-6">
-                <span className="text-indigo-600 dark:text-indigo-400 font-bold tracking-wider text-sm uppercase">Koleksi Terbaru</span>
-                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">Ribuan Judul Menanti</h3>
+        {/* --- SECTION 2: BENTO GRID FEATURES --- */}
+        <section className="relative z-10 py-32 px-6">
+            <div className="max-w-7xl mx-auto">
+                <div className="text-center max-w-3xl mx-auto mb-20">
+                    <h2 className="text-3xl md:text-5xl font-black mb-6">{t("More than just an E-Reader")}</h2>
+                    <p className="text-lg text-gray-600 dark:text-gray-400">{t("We combine the simplicity of physical books with the sophistication of digital technology.")}</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Large Card */}
+                    <SpotlightCard className="md:col-span-2 rounded-3xl p-8 md:p-12">
+                        <div className="relative z-10 h-full flex flex-col justify-between">
+                            <div className="w-14 h-14 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-6">
+                                <Icons.Library />
+                            </div>
+                            <div>
+                                <h3 className="text-2xl font-bold mb-4">{t("Pocket Library")}</h3>
+                                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                                    {t("Carry thousands of books anywhere. Our management system allows you to categorize, search, and filter favorite books in milliseconds.")}
+                                </p>
+                            </div>
+                            {/* Visual Decoration */}
+                            <div className="absolute right-0 bottom-0 w-1/2 h-full bg-gradient-to-l from-indigo-50/50 to-transparent dark:from-indigo-900/10 pointer-events-none rounded-r-3xl"></div>
+                        </div>
+                    </SpotlightCard>
+
+                    {/* Tall Card */}
+                    <SpotlightCard className="md:row-span-2 rounded-3xl p-8 md:p-12 bg-gray-900 text-white dark:border-gray-700">
+                        <div className="relative z-10 h-full flex flex-col">
+                            <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-white mb-6">
+                                <Icons.Lightning />
+                            </div>
+                            <h3 className="text-2xl font-bold mb-4">{t("Instant Access")}</h3>
+                            <p className="text-gray-300 leading-relaxed mb-8">
+                                {t("No waiting for delivery. Click, open, and start reading instantly. Our caching technology ensures books open lightning fast.")}
+                            </p>
+                            <div className="mt-auto relative w-full h-40 bg-gray-800/50 rounded-xl border border-gray-700 overflow-hidden">
+                                <div className="absolute top-4 left-4 right-4 h-2 bg-gray-700 rounded-full overflow-hidden">
+                                    <motion.div 
+                                        animate={{ width: ["0%", "100%"] }} 
+                                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} 
+                                        className="h-full bg-indigo-500"
+                                    />
+                                </div>
+                                <div className="absolute top-10 left-4 w-3/4 h-2 bg-gray-700 rounded-full"></div>
+                                <div className="absolute top-16 left-4 w-1/2 h-2 bg-gray-700 rounded-full"></div>
+                            </div>
+                        </div>
+                    </SpotlightCard>
+
+                    {/* Small Card 1 */}
+                    <SpotlightCard className="rounded-3xl p-8">
+                        <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 mb-4">
+                            <Icons.Device />
+                        </div>
+                        <h3 className="text-xl font-bold mb-2">{t("Multi-Device")}</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{t("Automatic synchronization between Mobile, Tablet, and Desktop.")}</p>
+                    </SpotlightCard>
+
+                    {/* Small Card 2 */}
+                    <SpotlightCard className="rounded-3xl p-8">
+                        <div className="w-12 h-12 rounded-xl bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center text-pink-600 mb-4">
+                            <Icons.Shield />
+                        </div>
+                        <h3 className="text-xl font-bold mb-2">{t("Focus Mode")}</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{t("UI that disappears while you read for maximum focus.")}</p>
+                    </SpotlightCard>
+                </div>
             </div>
-            <div className="relative w-full flex">
-                <div className="absolute left-0 top-0 w-20 h-full bg-gradient-to-r from-white dark:from-gray-900 to-transparent z-10"></div>
-                <div className="absolute right-0 top-0 w-20 h-full bg-gradient-to-l from-white dark:from-gray-900 to-transparent z-10"></div>
-                <div className="flex gap-8 whitespace-nowrap">
-                    {[...books, ...books, ...books].map((book, i) => (
-                        <motion.div key={i} animate={{ x: ["0%", "-100%"] }} transition={{ repeat: Infinity, duration: 25, ease: "linear" }} className="flex-shrink-0 py-10 px-2">
-                            <MockBook color={book.color} title={book.title} rotate={book.rotate} />
+        </section>
+
+        {/* --- SECTION 3: CALL TO ACTION --- */}
+        <section className="relative py-24 px-6">
+            <div className="max-w-5xl mx-auto">
+                <div className="relative rounded-[2.5rem] overflow-hidden bg-black dark:bg-indigo-950 shadow-2xl px-6 py-20 md:px-20 text-center">
+                    
+                    {/* Background Effects */}
+                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+                    <div className="absolute -top-24 -left-24 w-64 h-64 bg-indigo-500 rounded-full blur-[100px] opacity-50"></div>
+                    <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-purple-500 rounded-full blur-[100px] opacity-50"></div>
+
+                    <div className="relative z-10 space-y-8">
+                        <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight">
+                            {t("Start Your New Chapter Today.")}
+                        </h2>
+                        <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto">
+                            {t("Join the community of smart readers. Free to start, no credit card required.")}
+                        </p>
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                            <Link href="/register" className="inline-block px-10 py-5 bg-white text-black rounded-full font-bold text-lg shadow-[0_0_40px_-10px_rgba(255,255,255,0.5)] hover:shadow-[0_0_60px_-10px_rgba(255,255,255,0.7)] transition-shadow">
+                                {t("Create Free Account")}
+                            </Link>
                         </motion.div>
-                    ))}
+                    </div>
                 </div>
             </div>
-        </section>
-
-        {/* --- SECTION 4: STEPS (How it Works) --- */}
-        <section className="py-24 px-6 relative bg-gray-50 dark:bg-gray-800/30">
-             <div className="max-w-6xl mx-auto">
-                <div className="text-center mb-20">
-                   <h3 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Mulai dalam 3 Langkah</h3>
-                </div>
-                <div className="relative grid grid-cols-1 md:grid-cols-3 gap-12">
-                   {/* Connecting Line (Desktop Only) */}
-                   <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 z-0">
-                      <svg className="w-full overflow-visible" height="100">
-                         <path d="M0,0 C150,50 300,-50 450,0 C600,50 750,-50 900,0" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-300 dark:text-gray-700" strokeDasharray="10 10"/>
-                      </svg>
-                   </div>
-                   {/* Step Items */}
-                   {[{icon: "📝", title: "Daftar Akun", desc: "Buat akun gratis dalam 30 detik."}, 
-                     {icon: "🔍", title: "Pilih Buku", desc: "Jelajahi ribuan koleksi eksklusif."}, 
-                     {icon: "📖", title: "Mulai Membaca", desc: "Nikmati reader canggih di perangkat apapun."}
-                   ].map((step, i) => (
-                       <div key={i} className="relative z-10 flex flex-col items-center text-center group">
-                          <div className="w-20 h-20 bg-white dark:bg-gray-800 rounded-full shadow-lg border-4 border-indigo-50 dark:border-gray-700 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                             <span className="text-2xl">{step.icon}</span>
-                          </div>
-                          <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{step.title}</h4>
-                          <p className="text-gray-600 dark:text-gray-400 text-sm max-w-xs">{step.desc}</p>
-                       </div>
-                   ))}
-                </div>
-             </div>
-        </section>
-
-        {/* --- SECTION 5: CTA & STATS --- */}
-        <section className="py-20 px-6">
-             <div className="max-w-6xl mx-auto">
-                <div className="relative rounded-3xl overflow-hidden bg-indigo-900 dark:bg-gray-900 shadow-2xl">
-                   <div className="absolute inset-0">
-                      <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-700 opacity-90 dark:opacity-80" />
-                      <svg className="absolute top-0 left-0 w-full h-full opacity-20" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0 100 C 20 0 50 0 100 100 Z" fill="white" /></svg>
-                   </div>
-                   <div className="relative z-10 px-8 py-16 md:p-20 flex flex-col md:flex-row items-center justify-between gap-10">
-                      <div className="text-center md:text-left space-y-4 flex-1">
-                         <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight">Siap menyelami dunia literasi?</h2>
-                         <p className="text-indigo-100 text-lg max-w-md">Bergabunglah sekarang dan dapatkan akses ke koleksi eksklusif kami.</p>
-                      </div>
-                      <div className="flex flex-col items-center gap-6">
-                          <div className="flex gap-8 text-white/90 mb-2">
-                              <div className="text-center"><div className="text-2xl font-bold">5K+</div><div className="text-xs opacity-70 uppercase">Buku</div></div>
-                              <div className="w-px bg-white/20 h-10"></div>
-                              <div className="text-center"><div className="text-2xl font-bold">2K+</div><div className="text-xs opacity-70 uppercase">Member</div></div>
-                          </div>
-                          <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="/register" className="px-8 py-4 bg-white text-indigo-700 rounded-full font-bold text-lg shadow-lg hover:shadow-xl transition-all">
-                            Daftar Gratis Sekarang
-                          </motion.a>
-                      </div>
-                   </div>
-                </div>
-             </div>
         </section>
 
       </div>
     </PublicLayout>
   );
-};
-
-export default LandingPage;
+}

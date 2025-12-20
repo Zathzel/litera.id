@@ -4,6 +4,8 @@ import { ReactReader } from 'react-reader';
 import { Head, Link } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+// 1. IMPORT HOOK
+import useTranslation from "@/hooks/UseTranslation";
 
 // --- CONFIG WORKER ---
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -20,7 +22,7 @@ interface Book { id: number; title: string; author?: string; file_url: string; }
 interface Note { page: number | string; text: string; date: string; }
 interface ReadProps { book: Book; initialLocation?: number | string; auth: { user: User | null }; }
 
-// --- ICONS ---
+// --- ICONS (TETAP SAMA) ---
 const Icons = {
   ChevronLeft: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>,
   ChevronRight: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>,
@@ -30,15 +32,22 @@ const Icons = {
   X: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>,
   Bookmark: ({ solid }: { solid?: boolean }) => <svg className="w-5 h-5" fill={solid ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>,
   Clock: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
+  Search: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>,
   Trash: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>,
   ArrowLeft: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>,
-  // Icon Theme Background (Kotak/Layar)
+  Sun: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>,
+  Moon: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>,
+  Eye: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>,
+  Translate: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" /></svg>,
   BgLight: () => <div className="w-5 h-5 rounded border border-gray-400 bg-gray-100"></div>,
   BgSepia: () => <div className="w-5 h-5 rounded border border-[#d4c5a0] bg-[#f4ecd8]"></div>,
   BgDark: () => <div className="w-5 h-5 rounded border border-gray-600 bg-gray-900"></div>,
 };
 
 export default function Read({ book, initialLocation, auth }: ReadProps) {
+  // 2. PANGGIL HOOK
+  const { t } = useTranslation();
+  
   const isEpub = book.file_url.toLowerCase().endsWith('.epub');
 
   // --- CORE STATE ---
@@ -52,11 +61,8 @@ export default function Read({ book, initialLocation, auth }: ReadProps) {
 
   // --- UI & THEME STATE ---
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'info' | 'bookmarks' | 'notes'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'bookmarks' | 'notes' | 'translate'>('info');
   const [showUI, setShowUI] = useState(true);
-  
-  // Theme state sekarang hanya mempengaruhi BACKGROUND APLIKASI
-  // Nilai: 'light' (Gray), 'dark' (Black), 'sepia' (Creamy)
   const [bgTheme, setBgTheme] = useState<'light' | 'dark' | 'sepia'>('light');
   
   const uiTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -66,6 +72,12 @@ export default function Read({ book, initialLocation, auth }: ReadProps) {
   const [bookmarks, setBookmarks] = useState<(number | string)[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [currentNote, setCurrentNote] = useState("");
+
+  // --- TRANSLATION STATE ---
+  const [selectedText, setSelectedText] = useState("");
+  const [translatedText, setTranslatedText] = useState("");
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [targetLang, setTargetLang] = useState("id");
 
   // --- 1. HANDLE RESIZE & UI ---
   const resetUITimer = useCallback(() => {
@@ -103,20 +115,78 @@ export default function Read({ book, initialLocation, auth }: ReadProps) {
     return () => clearInterval(timer);
   }, []);
 
+  // [TRANSLATE] Format Time
   const formatTime = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
-    return hrs > 0 ? `${hrs}j ${mins}m` : `${mins}m ${seconds % 60}d`;
+    // h = hours, m = minutes, s = seconds (ambil dari JSON)
+    return hrs > 0 
+        ? `${hrs}${t("h")} ${mins}${t("m")}` 
+        : `${mins}${t("m")} ${seconds % 60}${t("s")}`;
   };
 
-  // --- 3. EPUB FONT SIZE ---
+  // --- 3. THEME HANDLER ---
   useEffect(() => {
+    const root = document.documentElement;
+    if (bgTheme === 'dark') root.classList.add('dark');
+    else root.classList.remove('dark');
+    
+    // PERBAIKAN: JANGAN UBAH WARNA/THEME EPUB SAAT GANTI MODE
+    // Hanya update font size agar isi buku tetap nyaman dibaca (Putih/Default)
     if (renditionRef.current) {
         renditionRef.current.themes.fontSize(`${epubFontSize}%`);
+        
+        // Opsional: Paksa tema 'light' jika ingin konsisten putih
+        // renditionRef.current.themes.select('light'); 
     }
-  }, [epubFontSize]);
+  }, [bgTheme, epubFontSize]);
 
-  // --- 4. DATA PERSISTENCE ---
+  // --- 4. TRANSLATION LOGIC ---
+  const handleTranslate = async (text: string) => {
+      if (!text || text.trim().length === 0) return;
+      
+      setSidebarOpen(true);
+      setActiveTab('translate');
+      setIsTranslating(true);
+      setSelectedText(text);
+      setTranslatedText("");
+
+      try {
+          const response = await axios.get(`https://api.mymemory.translated.net/get`, {
+              params: {
+                  q: text,
+                  langpair: `en|${targetLang}`,
+              }
+          });
+
+          if (response.data && response.data.responseData) {
+              setTranslatedText(response.data.responseData.translatedText);
+          } else {
+              setTranslatedText(t("Failed to translate."));
+          }
+      } catch (error) {
+          console.error("Translation error:", error);
+          setTranslatedText(t("Connection error."));
+      } finally {
+          setIsTranslating(false);
+      }
+  };
+
+  useEffect(() => {
+      const handleSelection = () => {
+          const selection = window.getSelection();
+          if (selection && selection.toString().trim().length > 0) {
+              handleTranslate(selection.toString());
+          }
+      };
+
+      if (!isEpub) {
+          document.addEventListener('mouseup', handleSelection);
+          return () => document.removeEventListener('mouseup', handleSelection);
+      }
+  }, [isEpub, targetLang]);
+
+  // --- 5. DATA PERSISTENCE & ACTIONS ---
   useEffect(() => {
     const b = localStorage.getItem(`bookmarks_${book.id}`);
     const n = localStorage.getItem(`notes_${book.id}`);
@@ -128,7 +198,6 @@ export default function Read({ book, initialLocation, auth }: ReadProps) {
   const getCurrentLocation = () => isEpub ? epubLocation : pageNumber;
   const saveProgress = (loc: string | number) => axios.post(`/books/${book.id}/progress`, { cfi: loc.toString() }).catch(() => {});
 
-  // --- 5. PAGE ACTIONS ---
   const changePdfPage = (offset: number) => {
     setPageNumber(prev => {
       const next = prev + offset;
@@ -165,22 +234,19 @@ export default function Read({ book, initialLocation, auth }: ReadProps) {
     setCurrentNote("");
   };
 
-  // --- BACKGROUND CLASS LOGIC ---
-  // Ini hanya mengubah warna "Meja" di belakang kertas.
-  // Kertas tetap putih.
   const getBgClass = () => {
       switch (bgTheme) {
-          case 'sepia': return 'bg-[#e8dec0]'; // Warna meja kayu/krem
-          case 'dark': return 'bg-[#1a1a1a]';  // Warna meja gelap
-          default: return 'bg-gray-100';       // Warna meja standar
+          case 'sepia': return 'bg-[#e8dec0]'; 
+          case 'dark': return 'bg-[#1a1a1a]';  
+          default: return 'bg-gray-100';       
       }
   };
 
   return (
     <div className={`relative min-h-screen w-full overflow-hidden transition-colors duration-500 ${getBgClass()}`}>
-      <Head title={`Reading: ${book.title}`} />
+      <Head title={`${t("Reading")}: ${book.title}`} />
 
-      {/* === TOP BAR (Floating) === */}
+      {/* === TOP BAR === */}
       <AnimatePresence>
         {showUI && (
           <motion.header 
@@ -195,7 +261,8 @@ export default function Read({ book, initialLocation, auth }: ReadProps) {
                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md hover:bg-white/20 text-white transition border border-white/10 shadow-lg"
                >
                  <Icons.ArrowLeft />
-                 <span className="text-sm font-medium hidden sm:inline">Kembali</span>
+                 {/* [TRANSLATE] */}
+                 <span className="text-sm font-medium hidden sm:inline">{t("Back")}</span>
                </Link>
             </div>
 
@@ -216,12 +283,10 @@ export default function Read({ book, initialLocation, auth }: ReadProps) {
         )}
       </AnimatePresence>
 
-      {/* === MAIN READER AREA === */}
+      {/* === MAIN READER === */}
       <main className={`flex flex-col items-center justify-center min-h-screen w-full transition-all duration-300 ${sidebarOpen ? 'lg:pr-80' : ''}`}>
-        
         <div className="relative w-full h-[calc(100vh)] flex items-center justify-center p-4 sm:p-8">
             
-            {/* EPUB RENDERER */}
             {isEpub && (
                 <div className="w-full max-w-4xl h-[85vh] shadow-2xl rounded-sm overflow-hidden bg-white relative ring-1 ring-black/5">
                     <ReactReader
@@ -230,18 +295,24 @@ export default function Read({ book, initialLocation, auth }: ReadProps) {
                         locationChanged={onEpubLocationChanged}
                         getRendition={(rendition) => {
                             renditionRef.current = rendition;
-                            // KITA PAKSA THEME LIGHT AGAR BUKU TETAP PUTIH
-                            // Meskipun background app gelap/sepia.
+                            
+                            // PERBAIKAN: Set Default Theme 'Light' sekali saja saat init
+                            // agar background putih dan teks hitam (standar buku)
                             rendition.themes.register('light', { body: { color: '#000', background: '#fff' } });
                             rendition.themes.select('light');
                             rendition.themes.fontSize(`${epubFontSize}%`);
+                            
+                            rendition.on('selected', (cfiRange: any, contents: any) => {
+                                const selection = contents.window.getSelection();
+                                handleTranslate(selection.toString());
+                                contents.window.getSelection().removeAllRanges(); 
+                            });
                         }}
                         epubOptions={{ flow: 'paginated', width: '100%', height: '100%' }}
                     />
                 </div>
             )}
 
-            {/* PDF RENDERER */}
             {!isEpub && (
                 <div className="shadow-2xl rounded-sm overflow-hidden transition-all duration-300 ring-1 ring-black/5">
                     <Document
@@ -250,31 +321,27 @@ export default function Read({ book, initialLocation, auth }: ReadProps) {
                         loading={
                             <div className="flex flex-col items-center text-gray-400">
                                 <div className="animate-spin rounded-full h-10 w-10 border-4 border-white/30 border-t-white mb-4"></div>
-                                <span>Memuat Dokumen...</span>
+                                {/* [TRANSLATE] */}
+                                <span>{t("Loading Document...")}</span>
                             </div>
                         }
                         className="flex justify-center"
                     >
-                        {/* BUG FIX: 
-                            Tidak ada class filter (opacity/sepia) di sini. 
-                            Halaman PDF akan selalu tampil original (background putih, teks hitam/warna asli).
-                        */}
                         <Page 
                             pageNumber={pageNumber} 
                             scale={scale} 
                             width={containerWidth}
                             className="bg-white" 
-                            renderTextLayer={false}
+                            renderTextLayer={true} 
                             renderAnnotationLayer={false}
                         />
                     </Document>
                 </div>
             )}
         </div>
-
       </main>
 
-      {/* === BOTTOM CONTROLS (Floating) === */}
+      {/* === BOTTOM CONTROLS === */}
       <AnimatePresence>
         {showUI && (
           <motion.div 
@@ -285,7 +352,6 @@ export default function Read({ book, initialLocation, auth }: ReadProps) {
           >
             <div className="flex items-center gap-4 px-6 py-3 rounded-2xl bg-black/70 backdrop-blur-xl border border-white/10 shadow-2xl text-white">
                 
-                {/* Navigation */}
                 {!isEpub && (
                     <>
                         <button onClick={() => changePdfPage(-1)} disabled={pageNumber <= 1} className="p-2 hover:bg-white/20 rounded-full transition disabled:opacity-30"><Icons.ChevronLeft /></button>
@@ -295,22 +361,19 @@ export default function Read({ book, initialLocation, auth }: ReadProps) {
                     </>
                 )}
 
-                {/* Theme Toggles (Hanya Ubah Background App) */}
                 <div className="flex items-center gap-1 bg-white/10 rounded-lg p-1">
-                    <button onClick={() => setBgTheme('light')} className={`p-1.5 rounded-md transition ${bgTheme === 'light' ? 'bg-white text-black' : 'hover:bg-white/10'}`} title="Background Terang"><Icons.BgLight /></button>
-                    <button onClick={() => setBgTheme('sepia')} className={`p-1.5 rounded-md transition ${bgTheme === 'sepia' ? 'bg-[#f6eec9] text-[#5f4b32]' : 'hover:bg-white/10'}`} title="Background Sepia"><Icons.BgSepia /></button>
-                    <button onClick={() => setBgTheme('dark')} className={`p-1.5 rounded-md transition ${bgTheme === 'dark' ? 'bg-gray-800 text-white' : 'hover:bg-white/10'}`} title="Background Gelap"><Icons.BgDark /></button>
+                    <button onClick={() => setBgTheme('light')} className={`p-1.5 rounded-md transition ${bgTheme === 'light' ? 'bg-white text-black' : 'hover:bg-white/10'}`}><Icons.BgLight /></button>
+                    <button onClick={() => setBgTheme('sepia')} className={`p-1.5 rounded-md transition ${bgTheme === 'sepia' ? 'bg-[#f4ecd8] text-[#5f4b32]' : 'hover:bg-white/10'}`}><Icons.BgSepia /></button>
+                    <button onClick={() => setBgTheme('dark')} className={`p-1.5 rounded-md transition ${bgTheme === 'dark' ? 'bg-gray-800 text-white' : 'hover:bg-white/10'}`}><Icons.BgDark /></button>
                 </div>
 
                 <div className="w-px h-6 bg-white/20 mx-2"></div>
 
-                {/* Tools */}
                 <button onClick={() => handleZoom('out')} className="p-2 hover:bg-white/20 rounded-full transition"><Icons.ZoomOut /></button>
                 <button onClick={() => handleZoom('in')} className="p-2 hover:bg-white/20 rounded-full transition"><Icons.ZoomIn /></button>
                 <button onClick={toggleBookmark} className={`p-2 hover:bg-white/20 rounded-full transition ${bookmarks.includes(getCurrentLocation()) ? 'text-yellow-400' : ''}`}>
                     <Icons.Bookmark solid={bookmarks.includes(getCurrentLocation())} />
                 </button>
-
             </div>
           </motion.div>
         )}
@@ -328,84 +391,133 @@ export default function Read({ book, initialLocation, auth }: ReadProps) {
                 <motion.div
                     initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
                     transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                    className="fixed top-0 right-0 bottom-0 w-80 z-50 shadow-2xl border-l flex flex-col bg-white text-gray-900 border-gray-200"
+                    className={`fixed top-0 right-0 bottom-0 w-80 z-50 shadow-2xl border-l flex flex-col ${
+                        bgTheme === 'dark' ? 'bg-gray-900 border-gray-800 text-white' : 
+                        bgTheme === 'sepia' ? 'bg-[#f4ecd8] border-[#e0d6b9] text-[#433422]' : 
+                        'bg-white border-gray-200 text-gray-900'
+                    }`}
                 >
-                    {/* Sidebar Header */}
-                    <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200">
-                        <h2 className="font-bold text-lg flex items-center gap-2"><Icons.Menu /> Menu Baca</h2>
+                    <div className="flex items-center justify-between px-6 py-5 border-b border-inherit">
+                        {/* [TRANSLATE] */}
+                        <h2 className="font-bold text-lg flex items-center gap-2"><Icons.Menu /> {t("Reading Menu")}</h2>
                         <button onClick={() => setSidebarOpen(false)} className="hover:text-red-500 transition"><Icons.X /></button>
                     </div>
 
-                    {/* Sidebar Tabs */}
-                    <div className="flex border-b border-gray-200">
-                        {['info', 'bookmarks', 'notes'].map(tab => (
+                    <div className="flex border-b border-inherit overflow-x-auto">
+                        {['info', 'bookmarks', 'notes', 'translate'].map(tab => (
                             <button 
                                 key={tab} 
                                 onClick={() => setActiveTab(tab as any)}
-                                className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest border-b-2 transition ${activeTab === tab ? 'border-indigo-500 text-indigo-500' : 'border-transparent text-gray-500 hover:text-gray-900'}`}
+                                className={`flex-1 min-w-[70px] py-3 text-[10px] font-bold uppercase tracking-widest border-b-2 transition ${activeTab === tab ? 'border-indigo-500 text-indigo-500' : 'border-transparent opacity-60 hover:opacity-100'}`}
                             >
-                                {tab}
+                                {/* [TRANSLATE] Capitalize Key for Translation */}
+                                {t(tab.charAt(0).toUpperCase() + tab.slice(1))}
                             </button>
                         ))}
                     </div>
 
                     <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                        {/* Sidebar Content: Info */}
+                        
+                        {/* TAB: INFO */}
                         {activeTab === 'info' && (
                             <div className="text-center space-y-4">
-                                <div className="w-24 h-32 bg-gray-200 mx-auto rounded shadow-lg flex items-center justify-center overflow-hidden text-4xl">
-                                    📖
-                                </div>
+                                <div className="w-24 h-32 bg-gray-200 mx-auto rounded shadow-lg flex items-center justify-center overflow-hidden text-4xl">📖</div>
                                 <div>
                                     <h3 className="font-bold text-lg leading-tight">{book.title}</h3>
-                                    <p className="text-sm text-gray-500 mt-1">{book.author || 'Unknown Author'}</p>
+                                    <p className="text-sm opacity-70 mt-1">{book.author || t("Unknown Author")}</p>
                                 </div>
-                                <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-100">
-                                    <p className="text-xs font-bold uppercase text-gray-500 mb-1">Total Waktu Baca</p>
-                                    <p className="text-2xl font-mono font-bold text-indigo-600">{formatTime(readingTime)}</p>
+                                <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+                                    {/* [TRANSLATE] */}
+                                    <p className="text-xs font-bold uppercase opacity-60 mb-1">{t("Total Reading Time")}</p>
+                                    <p className="text-2xl font-mono font-bold text-indigo-500">{formatTime(readingTime)}</p>
                                 </div>
                             </div>
                         )}
 
-                        {/* Sidebar Content: Bookmarks */}
+                        {/* TAB: TRANSLATE */}
+                        {activeTab === 'translate' && (
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    {/* [TRANSLATE] */}
+                                    <h3 className="font-bold text-sm">{t("Translator")}</h3>
+                                    <select 
+                                        value={targetLang} 
+                                        onChange={(e) => setTargetLang(e.target.value)}
+                                        className="text-xs p-1 rounded bg-transparent border border-inherit focus:ring-1 focus:ring-indigo-500"
+                                    >
+                                        <option value="id">Indonesia</option>
+                                        <option value="en">English</option>
+                                        <option value="ja">Japan</option>
+                                        <option value="es">Spain</option>
+                                    </select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    {/* [TRANSLATE] */}
+                                    <label className="text-xs font-bold uppercase opacity-60">{t("Original Text")}</label>
+                                    <div className="p-3 rounded-xl bg-black/5 dark:bg-white/5 border border-inherit text-sm italic min-h-[60px]">
+                                        {/* [TRANSLATE] */}
+                                        {selectedText || t("Select text in the book to translate...")}
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-center">
+                                    <Icons.ArrowLeft />
+                                </div>
+
+                                <div className="space-y-2">
+                                    {/* [TRANSLATE] */}
+                                    <label className="text-xs font-bold uppercase opacity-60">{t("Translation")}</label>
+                                    <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-sm font-medium min-h-[60px]">
+                                        {isTranslating ? (
+                                            <span className="flex items-center gap-2 animate-pulse">
+                                                {/* [TRANSLATE] */}
+                                                <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce"></div> {t("Translating...")}
+                                            </span>
+                                        ) : (
+                                            /* [TRANSLATE] */
+                                            translatedText || t("Translation result will appear here.")
+                                        )}
+                                    </div>
+                                </div>
+                                <p className="text-[10px] opacity-50 text-center">Powered by MyMemory API (Demo)</p>
+                            </div>
+                        )}
+
+                        {/* TAB: BOOKMARKS */}
                         {activeTab === 'bookmarks' && (
                             <div className="space-y-3">
-                                {bookmarks.length === 0 ? (
-                                    <p className="text-center text-gray-400 text-sm mt-10">Belum ada halaman yang ditandai.</p>
-                                ) : bookmarks.map((loc, i) => (
-                                    <button key={i} onClick={() => { if(!isEpub) setPageNumber(Number(loc)); else setEpubLocation(loc); }} className="w-full flex justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition text-sm font-medium border border-gray-100">
-                                        <span>{isEpub ? `Lokasi #${i+1}` : `Halaman ${loc}`}</span>
+                                {bookmarks.map((loc, i) => (
+                                    <button key={i} onClick={() => { if(!isEpub) setPageNumber(Number(loc)); else setEpubLocation(loc); }} className="w-full flex justify-between p-3 rounded-lg bg-black/5 hover:bg-black/10 transition text-sm font-medium">
+                                        {/* [TRANSLATE] */}
+                                        <span>{isEpub ? `${t("Location")} #${i+1}` : `${t("Page")} ${loc}`}</span>
                                         <Icons.ChevronRight />
                                     </button>
                                 ))}
                             </div>
                         )}
 
-                        {/* Sidebar Content: Notes */}
+                        {/* TAB: NOTES */}
                         {activeTab === 'notes' && (
                             <div className="space-y-4">
                                 <div className="space-y-2">
                                     <textarea 
                                         value={currentNote} 
                                         onChange={e => setCurrentNote(e.target.value)} 
-                                        placeholder="Tulis catatan..." 
-                                        className="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-indigo-500 transition text-sm resize-none"
+                                        // [TRANSLATE]
+                                        placeholder={t("Write a note...")} 
+                                        className="w-full p-3 rounded-xl bg-transparent border border-inherit focus:ring-2 focus:ring-indigo-500 transition text-sm resize-none"
                                         rows={3}
                                     />
-                                    <button onClick={saveNote} className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold transition">Simpan Catatan</button>
+                                    {/* [TRANSLATE] */}
+                                    <button onClick={saveNote} className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold transition">{t("Save Note")}</button>
                                 </div>
-                                <div className="space-y-3">
-                                    {notes.map((note, i) => (
-                                        <div key={i} className="p-3 rounded-xl bg-yellow-50 border border-yellow-100 relative group">
-                                            <div className="flex justify-between items-center mb-1">
-                                                <span className="text-[10px] font-bold uppercase bg-yellow-100 px-1.5 rounded text-yellow-700">Hal. {note.page}</span>
-                                                <span className="text-[10px] text-gray-400">{note.date}</span>
-                                            </div>
-                                            <p className="text-sm leading-relaxed text-gray-700">{note.text}</p>
-                                            <button onClick={() => { const n = notes.filter((_, idx) => idx !== i); setNotes(n); saveToLocal(`notes_${book.id}`, n); }} className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-red-500 hover:bg-red-100 p-1 rounded transition"><Icons.Trash /></button>
-                                        </div>
-                                    ))}
-                                </div>
+                                {notes.map((note, i) => (
+                                    <div key={i} className="p-3 rounded-xl bg-yellow-100/50 border border-yellow-500/20 relative group">
+                                        <p className="text-sm leading-relaxed opacity-90">{note.text}</p>
+                                        <button onClick={() => { const n = notes.filter((_, idx) => idx !== i); setNotes(n); saveToLocal(`notes_${book.id}`, n); }} className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-red-500 p-1"><Icons.Trash /></button>
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>

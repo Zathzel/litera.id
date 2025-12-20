@@ -1,6 +1,8 @@
 import DashboardLayout from "@/layouts/dashboard/DashboardLayout";
 import { Head, Link, router } from "@inertiajs/react";
 import { useState } from "react";
+// 1. IMPORT HOOK
+import useTranslation from "@/hooks/UseTranslation";
 
 // --- Tipe Data ---
 interface Category {
@@ -13,7 +15,6 @@ interface Book {
   author: string | null;
   cover_path: string | null;
   category: Category | null;
-  // Progress membaca (opsional, jika Anda mengirimnya dari controller)
   progress?: number; 
 }
 
@@ -22,10 +23,13 @@ interface Props {
 }
 
 export default function Bookmark({ bookmarks }: Props) {
+  // 2. PANGGIL HOOK
+  const { t } = useTranslation();
+
   const [search, setSearch] = useState("");
   const [processingId, setProcessingId] = useState<number | null>(null);
 
-  // Filter buku berdasarkan pencarian (Client-side search)
+  // Filter buku
   const filteredBooks = bookmarks.filter((book) =>
     book.title.toLowerCase().includes(search.toLowerCase()) ||
     book.author?.toLowerCase().includes(search.toLowerCase())
@@ -33,8 +37,6 @@ export default function Bookmark({ bookmarks }: Props) {
 
   // Handle Hapus Bookmark
   const handleRemoveBookmark = (bookId: number) => {
-    // Kita gunakan router.post ke endpoint toggle yang sudah ada
-    // Saat dihapus, inertia akan auto-refresh props 'bookmarks'
     setProcessingId(bookId);
     router.post(
       `/books/${bookId}/bookmark`, 
@@ -48,16 +50,19 @@ export default function Bookmark({ bookmarks }: Props) {
 
   return (
     <DashboardLayout>
-      <Head title="Bookmark Saya" />
+      {/* [TRANSLATE] Head Title */}
+      <Head title={t("My Bookmarks")} />
 
       {/* --- HEADER & SEARCH --- */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
             <h1 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            🔖 Perpustakaan Saya
+            {/* [TRANSLATE] */}
+            🔖 {t("My Library")}
             </h1>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Koleksi buku yang Anda simpan untuk dibaca nanti.
+                {/* [TRANSLATE] */}
+                {t("Collection of books you saved to read later.")}
             </p>
         </div>
 
@@ -65,7 +70,8 @@ export default function Bookmark({ bookmarks }: Props) {
         <div className="relative w-full md:w-64">
           <input
             type="text"
-            placeholder="Cari judul buku..."
+            // [TRANSLATE] Placeholder
+            placeholder={t("Search book title...")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition"
@@ -100,7 +106,8 @@ export default function Bookmark({ bookmarks }: Props) {
                 
                 {/* Badge Kategori */}
                 <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">
-                  {book.category?.name || "Umum"}
+                  {/* [TRANSLATE] Fallback category */}
+                  {book.category?.name || t("General")}
                 </div>
               </div>
 
@@ -110,17 +117,18 @@ export default function Bookmark({ bookmarks }: Props) {
                   {book.title}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                  {book.author || "Penulis tidak diketahui"}
+                  {/* [TRANSLATE] Fallback Author */}
+                  {book.author || t("Unknown Author")}
                 </p>
 
-                {/* Tombol Aksi (Footer Card) */}
+                {/* Tombol Aksi */}
                 <div className="mt-auto flex items-center gap-2">
                   {/* Tombol Baca */}
                   <Link
                     href={`/books/${book.id}/read`}
                     className="flex-1 inline-flex justify-center items-center py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition shadow-md hover:shadow-lg focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
-                    📖 Baca
+                    📖 {t("Read")}
                   </Link>
 
                   {/* Tombol Hapus Bookmark */}
@@ -128,7 +136,7 @@ export default function Bookmark({ bookmarks }: Props) {
                     onClick={() => handleRemoveBookmark(book.id)}
                     disabled={processingId === book.id}
                     className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition border border-gray-200 dark:border-gray-700 hover:border-red-200"
-                    title="Hapus dari Bookmark"
+                    title={t("Remove from Bookmarks")}
                   >
                     {processingId === book.id ? (
                         <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
@@ -155,19 +163,20 @@ export default function Bookmark({ bookmarks }: Props) {
                 </svg>
             </div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                {search ? "Buku tidak ditemukan" : "Belum ada bookmark"}
+                {/* [TRANSLATE] Logic */}
+                {search ? t("Book not found") : t("No bookmarks yet")}
             </h3>
             <p className="text-gray-500 dark:text-gray-400 max-w-sm mb-6">
                 {search 
-                  ? "Coba gunakan kata kunci pencarian yang lain." 
-                  : "Anda belum menandai buku apapun. Jelajahi koleksi kami dan simpan buku favorit Anda di sini."}
+                  ? t("Try using different keywords.") 
+                  : t("You haven't bookmarked any books yet. Explore our collection and save your favorites here.")}
             </p>
             {!search && (
                 <Link 
-                    href="/dashboard/books" // Atau href="/books" untuk halaman publik
+                    href="/dashboard/books" 
                     className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition shadow-lg shadow-indigo-500/30"
                 >
-                    Jelajahi Buku
+                    {t("Browse Books")}
                 </Link>
             )}
         </div>

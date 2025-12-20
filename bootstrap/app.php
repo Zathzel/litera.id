@@ -2,6 +2,8 @@
 
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+// 1. IMPORT MIDDLEWARE SETLOCALE
+use App\Http\Middleware\SetLocale; 
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,12 +19,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
         $middleware->web(append: [
+            // 2. TEMPATKAN 'SetLocale' DI PALING ATAS
+            // Ini wajib agar locale di-set SEBELUM data dikirim ke Inertia
+            SetLocale::class, 
+            
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
 
-        // 👇 TAMBAHKAN DI SINI UNTUK ALIAS MIDDLEWARE
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);

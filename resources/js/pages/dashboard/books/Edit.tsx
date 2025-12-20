@@ -1,6 +1,8 @@
 import { useForm } from "@inertiajs/react";
 import DashboardLayout from "@/layouts/dashboard/DashboardLayout";
 import { useState } from "react";
+// 1. IMPORT HOOK
+import useTranslation from "@/hooks/UseTranslation";
 
 interface Category {
   id: number;
@@ -23,6 +25,9 @@ interface EditProps {
 }
 
 export default function Edit({ book, categories }: EditProps) {
+  // 2. PANGGIL HOOK
+  const { t } = useTranslation();
+
   const { data, setData, put, processing, errors } = useForm({
     title: book.title,
     author: book.author,
@@ -38,10 +43,6 @@ export default function Edit({ book, categories }: EditProps) {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Menggunakan method PUT untuk update, tapi karena ada file upload 
-    // Inertia terkadang perlu _method: put di FormData atau pakai post dengan route helper.
-    // Namun kode asli Anda menggunakan put(), jika bekerja, biarkan saja.
-    // Jika gagal upload file di Laravel PUT request, ganti jadi router.post dengan _method: 'PUT'
     put(`/dashboard/books/${book.id}`);
   };
 
@@ -49,7 +50,7 @@ export default function Edit({ book, categories }: EditProps) {
     <DashboardLayout>
       <div className="max-w-xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6">
-          Edit Buku
+          {t("Edit Book")}
         </h1>
 
         <form
@@ -60,7 +61,7 @@ export default function Edit({ book, categories }: EditProps) {
           {/* TITLE */}
           <div>
             <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
-              Judul
+              {t("Book Title")}
             </label>
             <input
               type="text"
@@ -74,7 +75,7 @@ export default function Edit({ book, categories }: EditProps) {
           {/* AUTHOR */}
           <div>
             <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
-              Penulis
+              {t("Author")}
             </label>
             <input
               type="text"
@@ -88,7 +89,7 @@ export default function Edit({ book, categories }: EditProps) {
           {/* DESCRIPTION */}
           <div>
             <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
-              Deskripsi / Sinopsis
+              {t("Description / Synopsis")}
             </label>
             <textarea
               rows={4}
@@ -104,14 +105,14 @@ export default function Edit({ book, categories }: EditProps) {
           {/* CATEGORY */}
           <div>
             <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
-              Kategori
+              {t("Category")}
             </label>
             <select
               value={data.category_id}
               onChange={(e) => setData("category_id", e.target.value)}
               className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-2 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none dark:bg-gray-700 dark:text-white"
             >
-              <option value="">-- pilih kategori --</option>
+              <option value="">-- {t("select category")} --</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -123,14 +124,14 @@ export default function Edit({ book, categories }: EditProps) {
             )}
           </div>
 
-          {/* FILE (UPDATED: Accept PDF & EPUB) */}
+          {/* FILE */}
           <div>
             <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
-              Ganti File Buku <span className="text-gray-400 text-sm">(opsional)</span>
+              {t("Replace Book File")} <span className="text-gray-400 text-sm">({t("optional")})</span>
             </label>
             <input
               type="file"
-              accept=".pdf,.epub" // <--- PERUBAHAN DI SINI
+              accept=".pdf,.epub"
               onChange={(e) => setData("file", e.target.files?.[0] || null)}
               className="w-full dark:text-gray-300"
             />
@@ -142,14 +143,14 @@ export default function Edit({ book, categories }: EditProps) {
               rel="noopener noreferrer"
               className="text-blue-600 dark:text-blue-400 underline block mt-2"
             >
-              Lihat file lama
+              {t("View current file")}
             </a>
           </div>
 
           {/* COVER */}
           <div>
             <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
-              Ganti Cover <span className="text-gray-400 text-sm">(opsional)</span>
+              {t("Replace Cover")} <span className="text-gray-400 text-sm">({t("optional")})</span>
             </label>
             <input
               type="file"
@@ -180,7 +181,7 @@ export default function Edit({ book, categories }: EditProps) {
               ${processing ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}
             `}
           >
-            {processing ? "Menyimpan..." : "Update Buku"}
+            {processing ? t("Saving...") : t("Update Book")}
           </button>
         </form>
       </div>

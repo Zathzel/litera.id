@@ -1,7 +1,12 @@
 import DashboardLayout from "@/layouts/dashboard/DashboardLayout";
 import { useForm } from "@inertiajs/react";
+// 1. IMPORT HOOK
+import useTranslation from "@/hooks/UseTranslation";
 
 export default function Create() {
+  // 2. PANGGIL HOOK
+  const { t } = useTranslation();
+
   const { data, setData, post, errors, processing } = useForm({
     name: "",
   });
@@ -14,14 +19,14 @@ export default function Create() {
   return (
     <DashboardLayout>
       <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-200">
-        Tambah Kategori
+        {t("Add Category")}
       </h1>
 
       <div className="max-w-lg bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
         <form onSubmit={submit} className="space-y-4">
           <div>
             <label className="block mb-1 text-gray-700 dark:text-gray-300">
-              Nama Kategori
+              {t("Category Name")}
             </label>
 
             <input
@@ -40,7 +45,7 @@ export default function Create() {
             disabled={processing}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
           >
-            Simpan
+            {t("Save")}
           </button>
         </form>
       </div>

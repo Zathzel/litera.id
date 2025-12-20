@@ -1,6 +1,8 @@
 import DashboardLayout from "@/layouts/dashboard/DashboardLayout";
 import { useForm } from "@inertiajs/react";
 import { useState } from "react";
+// 1. IMPORT HOOK
+import useTranslation from "@/hooks/UseTranslation";
 
 type Category = {
   id: number;
@@ -8,6 +10,9 @@ type Category = {
 };
 
 export default function Create({ categories }: { categories: Category[] }) {
+  // 2. PANGGIL HOOK
+  const { t } = useTranslation();
+
   const { data, setData, post, errors, processing } = useForm({
     title: "",
     author: "",
@@ -28,14 +33,14 @@ export default function Create({ categories }: { categories: Category[] }) {
     <DashboardLayout>
       <div className="max-w-xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6">
-          Tambah Buku
+          {t("Add Book")}
         </h1>
 
         <form onSubmit={submit} className="space-y-5" encType="multipart/form-data">
           {/* TITLE */}
           <div>
             <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
-              Judul Buku
+              {t("Book Title")}
             </label>
             <input
               type="text"
@@ -49,7 +54,7 @@ export default function Create({ categories }: { categories: Category[] }) {
           {/* AUTHOR */}
           <div>
             <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
-              Penulis
+              {t("Author")}
             </label>
             <input
               type="text"
@@ -63,14 +68,15 @@ export default function Create({ categories }: { categories: Category[] }) {
           {/* DESCRIPTION */}
           <div>
             <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
-              Deskripsi / Sinopsis
+              {t("Description / Synopsis")}
             </label>
             <textarea
               rows={4}
               value={data.description}
               onChange={(e) => setData("description", e.target.value)}
               className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-2 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none dark:bg-gray-700 dark:text-white resize-none"
-              placeholder="Tuliskan sinopsis singkat buku ini..."
+              // [TRANSLATE] Placeholder
+              placeholder={t("Write a short synopsis of this book...")}
             ></textarea>
             {errors.description && (
               <p className="text-red-500 mt-1">{errors.description}</p>
@@ -80,14 +86,14 @@ export default function Create({ categories }: { categories: Category[] }) {
           {/* CATEGORY */}
           <div>
             <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
-              Kategori
+              {t("Category")}
             </label>
             <select
               value={data.category_id}
               onChange={(e) => setData("category_id", e.target.value)}
               className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-2 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none dark:bg-gray-700 dark:text-white"
             >
-              <option value="">-- pilih kategori --</option>
+              <option value="">-- {t("select category")} --</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -99,14 +105,14 @@ export default function Create({ categories }: { categories: Category[] }) {
             )}
           </div>
 
-          {/* FILE (UPDATED: Accept PDF & EPUB) */}
+          {/* FILE */}
           <div>
             <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
-              File Buku <span className="text-gray-400 text-sm">(.epub)</span>
+              {t("Book File")} <span className="text-gray-400 text-sm">(.epub)</span>
             </label>
             <input
               type="file"
-              accept=".pdf,.epub" // <--- PERUBAHAN DI SINI
+              accept=".pdf,.epub"
               onChange={(e) => setData("file", e.target.files?.[0] || null)}
               className="w-full dark:text-gray-300"
             />
@@ -116,7 +122,7 @@ export default function Create({ categories }: { categories: Category[] }) {
           {/* COVER */}
           <div>
             <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
-              Cover <span className="text-gray-400 text-sm">(opsional)</span>
+              {t("Cover")} <span className="text-gray-400 text-sm">({t("optional")})</span>
             </label>
             <input
               type="file"
@@ -138,6 +144,7 @@ export default function Create({ categories }: { categories: Category[] }) {
             {errors.cover && <p className="text-red-500 mt-1">{errors.cover}</p>}
           </div>
 
+          {/* SUBMIT */}
           <button
             type="submit"
             disabled={processing}
@@ -145,7 +152,7 @@ export default function Create({ categories }: { categories: Category[] }) {
               ${processing ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}
             `}
           >
-            {processing ? "Menyimpan..." : "Simpan Buku"}
+            {processing ? t("Saving...") : t("Save Book")}
           </button>
         </form>
       </div>

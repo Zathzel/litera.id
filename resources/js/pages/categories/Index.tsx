@@ -1,7 +1,9 @@
 import React from "react";
-import PublicLayout from "../../layouts/public/PublicLayout";
+import PublicLayout from "@/layouts/public/PublicLayout";
 import { Link } from "@inertiajs/react";
 import { motion, Variants } from "framer-motion";
+// 1. IMPORT HOOK
+import useTranslation from "@/hooks/UseTranslation";
 
 // --- TIPE DATA ---
 interface Category {
@@ -54,6 +56,9 @@ const itemVariants: Variants = {
 };
 
 export default function CategoryIndex({ categories }: { categories: Category[] }) {
+  // 2. PANGGIL HOOK
+  const { t } = useTranslation();
+
   return (
     <PublicLayout>
       <div className="relative min-h-screen pb-20">
@@ -62,7 +67,7 @@ export default function CategoryIndex({ categories }: { categories: Category[] }
             <GridPattern />
         </div>
 
-        {/* UPDATE DISINI: Mengubah pt-16 menjadi pt-28 md:pt-32 agar turun ke bawah navbar */}
+        {/* Content Container */}
         <div className="relative z-10 max-w-6xl mx-auto px-6 pt-28 md:pt-32">
           
           {/* --- HEADER --- */}
@@ -72,7 +77,7 @@ export default function CategoryIndex({ categories }: { categories: Category[] }
                animate={{ opacity: 1, y: 0 }}
                className="inline-block py-1 px-3 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-bold tracking-wider uppercase"
             >
-               Eksplorasi
+               {t("Exploration")}
             </motion.span>
             <motion.h1 
               initial={{ opacity: 0, y: 10 }}
@@ -80,7 +85,7 @@ export default function CategoryIndex({ categories }: { categories: Category[] }
               transition={{ delay: 0.1 }}
               className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white"
             >
-              Kategori <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">Pilihan</span>
+              {t("Categories")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">{t("Featured")}</span>
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0, y: 10 }}
@@ -88,7 +93,7 @@ export default function CategoryIndex({ categories }: { categories: Category[] }
               transition={{ delay: 0.2 }}
               className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
             >
-              Temukan buku berdasarkan topik yang Anda minati. Dari teknologi hingga sejarah, semua ada di sini.
+              {t("Find books based on topics you are interested in. From technology to history, everything is here.")}
             </motion.p>
           </div>
 
@@ -100,8 +105,8 @@ export default function CategoryIndex({ categories }: { categories: Category[] }
               className="text-center py-20 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-3xl border border-gray-200 dark:border-gray-700"
             >
               <div className="text-6xl mb-4">📂</div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Belum ada kategori</h3>
-              <p className="text-gray-500 dark:text-gray-400">Silakan cek kembali nanti.</p>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t("No categories yet")}</h3>
+              <p className="text-gray-500 dark:text-gray-400">{t("Please check back later.")}</p>
             </motion.div>
           ) : (
             // Grid List
@@ -132,7 +137,7 @@ export default function CategoryIndex({ categories }: { categories: Category[] }
                               {cat.name}
                             </h3>
                             <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                               Jelajahi Koleksi
+                               {t("Explore Collection")}
                             </p>
                           </div>
                         </div>

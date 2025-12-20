@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 
-// --- IMPORTS DARI LOGIC (Snippet 1) ---
+// --- IMPORTS DARI LOGIC ---
 import { Form } from '@inertiajs/react';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+// 1. IMPORT HOOK
+import useTranslation from "@/hooks/UseTranslation";
 
 // --- GLOBAL TYPE ---
 declare global {
@@ -20,7 +22,7 @@ declare global {
     }
 }
 
-// --- ICONS (Dari Desain/Snippet 2) ---
+// --- ICONS (TETAP SAMA) ---
 const Icons = {
     User: ({ className }: { className?: string }) => (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
@@ -45,11 +47,10 @@ const Icons = {
     )
 };
 
-// --- ANIMATED ILLUSTRATION (Dari Desain/Snippet 2) ---
+// --- ANIMATED ILLUSTRATION (TETAP SAMA) ---
 const AnimatedBook = () => {
     return (
         <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-zinc-900">
-            {/* 1. Background Gradient Blob */}
             <motion.div 
                 animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
                 transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
@@ -57,7 +58,6 @@ const AnimatedBook = () => {
             />
 
             <svg viewBox="0 0 400 400" className="w-full max-w-md h-auto relative z-10 drop-shadow-2xl">
-                {/* 2. Floating Elements (Particles) */}
                 {[...Array(5)].map((_, i) => (
                     <motion.circle 
                         key={i}
@@ -80,13 +80,11 @@ const AnimatedBook = () => {
                     />
                 ))}
 
-                {/* 3. The Book (Stroke Animation) */}
                 <motion.g 
                     initial={{ y: 10 }} 
                     animate={{ y: -10 }} 
                     transition={{ duration: 4, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
                 >
-                    {/* Book Cover / Outline */}
                     <motion.path
                         d="M60 300 C 60 300, 180 300, 200 320 C 220 300, 340 300, 340 300 V 100 C 340 100, 220 100, 200 120 C 180 100, 60 100, 60 100 Z"
                         fill="none"
@@ -98,7 +96,6 @@ const AnimatedBook = () => {
                         animate={{ pathLength: 1 }}
                         transition={{ duration: 2, ease: "easeInOut" }}
                     />
-                    {/* Book Spine */}
                     <motion.path
                         d="M200 320 V 120"
                         stroke="url(#gradient)"
@@ -107,18 +104,14 @@ const AnimatedBook = () => {
                         animate={{ pathLength: 1 }}
                         transition={{ duration: 1, delay: 1.5 }}
                     />
-                    {/* Text Lines Left */}
                     <motion.path d="M80 140 H 180" stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeLinecap="round" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 2.0 }} />
                     <motion.path d="M80 160 H 180" stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeLinecap="round" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 2.1 }} />
                     <motion.path d="M80 180 H 160" stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeLinecap="round" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 2.2 }} />
-                    
-                    {/* Text Lines Right */}
                     <motion.path d="M220 140 H 320" stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeLinecap="round" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 2.3 }} />
                     <motion.path d="M220 160 H 320" stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeLinecap="round" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 2.4 }} />
                     <motion.path d="M220 180 H 280" stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeLinecap="round" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 2.5 }} />
                 </motion.g>
 
-                {/* Definitions */}
                 <defs>
                     <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="0%" stopColor="#6366f1" />
@@ -127,7 +120,6 @@ const AnimatedBook = () => {
                 </defs>
             </svg>
 
-            {/* Overlay Tech Grid */}
             <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '30px 30px', opacity: 0.2 }}></div>
         </div>
     );
@@ -135,30 +127,30 @@ const AnimatedBook = () => {
 
 // --- MAIN COMPONENT ---
 export default function Register() {
-    // State lokal untuk visual (show/hide password)
+    // 2. PANGGIL HOOK
+    const { t } = useTranslation();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     return (
         <div className="min-h-screen w-full grid lg:grid-cols-2 font-sans text-zinc-900 dark:text-zinc-100 bg-white dark:bg-black selection:bg-indigo-500/30">
-            <Head title="Buat Akun Baru" />
+            {/* [TRANSLATE] */}
+            <Head title={t("Create New Account")} />
 
             {/* --- LEFT COLUMN: ARTWORK / BRANDING --- */}
             <div className="hidden lg:flex relative flex-col justify-between bg-zinc-900 text-white overflow-hidden">
-                {/* Animasi SVG */}
                 <AnimatedBook />
                 
-                {/* Branding Overlay */}
                 <div className="absolute top-12 left-12 z-20 flex items-center gap-3 text-2xl font-bold tracking-tight pointer-events-none">
                     <div className="w-10 h-10 bg-white text-indigo-900 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">L</div>
                     Litera.id
                 </div>
 
-                {/* Quote Overlay */}
                 <div className="absolute bottom-12 left-12 z-20 max-w-lg pointer-events-none">
                     <blockquote className="space-y-4">
                         <p className="text-2xl font-serif leading-relaxed text-zinc-200">
-                            "Satu-satunya hal yang harus Anda ketahui adalah lokasi perpustakaan."
+                            {/* [TRANSLATE] */}
+                            "{t("The only thing that you absolutely have to know, is the location of the library.")}"
                         </p>
                         <footer className="flex items-center gap-4 pt-4">
                             <div className="h-px w-8 bg-indigo-500/50"></div>
@@ -172,7 +164,6 @@ export default function Register() {
 
             {/* --- RIGHT COLUMN: FORM AREA --- */}
             <div className="flex flex-col justify-center items-center p-8 sm:p-12 lg:p-24 relative bg-white dark:bg-zinc-950">
-                {/* Mobile Logo */}
                 <div className="absolute top-8 left-8 lg:hidden">
                     <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight">
                         <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">L</div>
@@ -188,7 +179,8 @@ export default function Register() {
                             animate={{ opacity: 1, y: 0 }}
                             className="text-3xl md:text-4xl font-bold tracking-tight"
                         >
-                            Mulai Perjalanan Anda
+                            {/* [TRANSLATE] */}
+                            {t("Start Your Journey")}
                         </motion.h1>
                         <motion.p 
                             initial={{ opacity: 0, y: 10 }}
@@ -196,7 +188,8 @@ export default function Register() {
                             transition={{ delay: 0.1 }}
                             className="text-zinc-500 dark:text-zinc-400"
                         >
-                            Bergabunglah dengan komunitas pembaca terbesar hari ini.
+                            {/* [TRANSLATE] */}
+                            {t("Join the largest community of readers today.")}
                         </motion.p>
                     </div>
 
@@ -216,7 +209,8 @@ export default function Register() {
                                 <>
                                     {/* Name Input */}
                                     <div className="space-y-2">
-                                        <Label htmlFor="name" className="text-sm font-medium leading-none">Nama Lengkap</Label>
+                                        {/* [TRANSLATE] */}
+                                        <Label htmlFor="name" className="text-sm font-medium leading-none">{t("Full Name")}</Label>
                                         <div className="relative group">
                                             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-indigo-500 transition-colors z-10">
                                                 <Icons.User className="w-5 h-5" />
@@ -230,7 +224,6 @@ export default function Register() {
                                                 tabIndex={1}
                                                 autoComplete="name"
                                                 placeholder="John Doe"
-                                                // Override styles untuk padding icon & styling rounded/border custom
                                                 className="pl-10 h-11 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 focus-visible:ring-indigo-500"
                                             />
                                         </div>
@@ -239,7 +232,8 @@ export default function Register() {
 
                                     {/* Email Input */}
                                     <div className="space-y-2">
-                                        <Label htmlFor="email" className="text-sm font-medium leading-none">Email</Label>
+                                        {/* [TRANSLATE] */}
+                                        <Label htmlFor="email" className="text-sm font-medium leading-none">{t("Email")}</Label>
                                         <div className="relative group">
                                             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-indigo-500 transition-colors z-10">
                                                 <Icons.Mail className="w-5 h-5" />
@@ -262,7 +256,8 @@ export default function Register() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {/* Password Input */}
                                         <div className="space-y-2">
-                                            <Label htmlFor="password" className="text-sm font-medium leading-none">Password</Label>
+                                            {/* [TRANSLATE] */}
+                                            <Label htmlFor="password" className="text-sm font-medium leading-none">{t("Password")}</Label>
                                             <div className="relative group">
                                                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-indigo-500 transition-colors z-10">
                                                     <Icons.Lock className="w-5 h-5" />
@@ -290,7 +285,8 @@ export default function Register() {
 
                                         {/* Confirm Password Input */}
                                         <div className="space-y-2">
-                                            <Label htmlFor="password_confirmation" className="text-sm font-medium leading-none">Konfirmasi</Label>
+                                            {/* [TRANSLATE] */}
+                                            <Label htmlFor="password_confirmation" className="text-sm font-medium leading-none">{t("Confirm")}</Label>
                                             <div className="relative group">
                                                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-indigo-500 transition-colors z-10">
                                                     <Icons.ShieldCheck className="w-5 h-5" />
@@ -327,11 +323,13 @@ export default function Register() {
                                         {processing ? (
                                             <>
                                                 <Spinner className="mr-2 h-4 w-4" />
-                                                Membuat Akun...
+                                                {/* [TRANSLATE] */}
+                                                {t("Creating Account...")}
                                             </>
                                         ) : (
                                             <span className="flex items-center gap-2">
-                                                Daftar Sekarang
+                                                {/* [TRANSLATE] */}
+                                                {t("Register Now")}
                                                 <Icons.ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                             </span>
                                         )}
@@ -339,13 +337,15 @@ export default function Register() {
 
                                     {/* Login Link */}
                                     <div className="text-center text-sm pt-2">
-                                        <span className="text-zinc-500 dark:text-zinc-400">Sudah punya akun? </span>
+                                        {/* [TRANSLATE] */}
+                                        <span className="text-zinc-500 dark:text-zinc-400">{t("Already have an account?")} </span>
                                         <TextLink
                                             href={login()}
                                             tabIndex={6}
                                             className="font-bold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 hover:underline underline-offset-4 transition-all"
                                         >
-                                            Masuk di sini
+                                            {/* [TRANSLATE] */}
+                                            {t("Login here")}
                                         </TextLink>
                                     </div>
                                 </>

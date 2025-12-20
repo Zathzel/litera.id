@@ -1,6 +1,8 @@
 import DashboardLayout from "@/layouts/dashboard/DashboardLayout";
 import { Link, router, usePage } from "@inertiajs/react";
 import { useState } from "react";
+// 1. IMPORT HOOK
+import useTranslation from "@/hooks/UseTranslation";
 
 // Tipe Data User
 interface User {
@@ -26,16 +28,28 @@ interface PageProps {
   auth: {
     user: User;
   };
+  locale?: string; // Tambahkan ini untuk akses locale
   [key: string]: any;
 }
 
 export default function UserIndex() {
-  const { users, filters, auth } = usePage<PageProps>().props;
+  const { users, filters, auth, locale } = usePage<PageProps>().props;
+  
+  // 2. PANGGIL HOOK
+  const { t } = useTranslation();
   
   const [search, setSearch] = useState(filters?.search || "");
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  // Handle Search dengan Debounce atau Enter
+  // Helper untuk format tanggal sesuai bahasa aktif
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const loc = locale === 'id' ? 'id-ID' : 'en-US';
+    return date.toLocaleDateString(loc, {
+        year: 'numeric', month: 'long', day: 'numeric'
+    });
+  };
+
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       router.get("/dashboard/users", { search }, { preserveState: true });
@@ -44,10 +58,12 @@ export default function UserIndex() {
 
   const handleDelete = (id: number) => {
     if (id === auth.user.id) {
-        alert("Anda tidak dapat menghapus akun Anda sendiri.");
+        // [TRANSLATE] Alert
+        alert(t("You cannot delete your own account."));
         return;
     }
-    if (!confirm("Yakin ingin menghapus user ini? Tindakan ini tidak dapat dibatalkan.")) return;
+    // [TRANSLATE] Confirm
+    if (!confirm(t("Are you sure you want to delete this user? This action cannot be undone."))) return;
 
     setDeletingId(id);
     router.delete(`/dashboard/users/${id}`, {
@@ -61,10 +77,12 @@ export default function UserIndex() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
             <h1 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            👥 Kelola User
+            {/* [TRANSLATE] Title */}
+            👥 {t("Manage Users")}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Total {users.total} pengguna terdaftar.
+                {/* [TRANSLATE] Dynamic String */}
+                {t("Total registered users")}: {users.total}
             </p>
         </div>
 
@@ -72,7 +90,8 @@ export default function UserIndex() {
         <div className="relative w-full md:w-72">
             <input 
                 type="text" 
-                placeholder="Cari nama atau email... (Enter)" 
+                // [TRANSLATE] Placeholder
+                placeholder={t("Search name or email... (Enter)")} 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={handleSearch}
@@ -91,16 +110,16 @@ export default function UserIndex() {
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  User
+                  {t("User")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Role
+                  {t("Role")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Tanggal Gabung
+                  {t("Join Date")}
                 </th>
                 <th className="px-6 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Aksi
+                  {t("Action")}
                 </th>
               </tr>
             </thead>
@@ -124,7 +143,7 @@ export default function UserIndex() {
                         <div className="ml-4">
                           <div className="text-sm font-bold text-gray-900 dark:text-gray-100">
                             {user.name} 
-                            {user.id === auth.user.id && <span className="ml-2 text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-full">You</span>}
+                            {user.id === auth.user.id && <span className="ml-2 text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-full">{t("You")}</span>}
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">
                             {user.email}
@@ -140,15 +159,13 @@ export default function UserIndex() {
                             ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200' 
                             : 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200'
                       }`}>
-                        {user.role === 'admin' ? 'Administrator' : 'Reader'}
+                        {user.role === 'admin' ? t("Admin") : t("Reader")}
                       </span>
                     </td>
 
-                    {/* Kolom Tanggal */}
+                    {/* Kolom Tanggal (Dynamic Format) */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(user.created_at).toLocaleDateString("id-ID", {
-                        year: 'numeric', month: 'long', day: 'numeric'
-                      })}
+                      {formatDate(user.created_at)}
                     </td>
 
                     {/* Kolom Aksi */}
@@ -160,10 +177,10 @@ export default function UserIndex() {
                                 className={`text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition p-2 hover:bg-red-100 dark:hover:bg-gray-700 rounded-lg ${
                                     deletingId === user.id ? "opacity-50 cursor-not-allowed" : ""
                                 }`}
-                                title="Hapus User"
+                                title={t("Delete User")}
                             >
                                 {deletingId === user.id ? (
-                                    <span className="text-xs">Menghapus...</span>
+                                    <span className="text-xs">{t("Deleting...")}</span>
                                 ) : (
                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -171,7 +188,7 @@ export default function UserIndex() {
                                 )}
                             </button>
                         ) : (
-                            <span className="text-xs text-gray-400 italic">Akun Anda</span>
+                            <span className="text-xs text-gray-400 italic">{t("Your Account")}</span>
                         )}
                     </td>
                   </tr>
@@ -179,8 +196,8 @@ export default function UserIndex() {
               ) : (
                 <tr>
                   <td colSpan={4} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                    <p className="text-lg font-medium">Tidak ada user ditemukan.</p>
-                    <p className="text-sm">Coba kata kunci pencarian lain.</p>
+                    <p className="text-lg font-medium">{t("No users found.")}</p>
+                    <p className="text-sm">{t("Try different search keywords.")}</p>
                   </td>
                 </tr>
               )}

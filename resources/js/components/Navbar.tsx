@@ -1,6 +1,8 @@
 import { Link, useForm, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+// 1. IMPORT HOOK
+import useTranslation from "@/hooks/UseTranslation";
 
 // --- TYPES ---
 interface User {
@@ -15,7 +17,7 @@ interface NavbarProps {
     };
 }
 
-// --- ICONS (Minimalis & Konsisten) ---
+// --- ICONS (TETAP SAMA) ---
 const Icons = {
     Sun: ({ className }: { className?: string }) => (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
@@ -75,6 +77,9 @@ const MobileNavLink = ({ href, children, active, icon: Icon }: { href: string; c
 );
 
 export default function Navbar({ auth }: NavbarProps) {
+    // 2. PANGGIL HOOK
+    const { t } = useTranslation();
+    
     const { url } = usePage();
     const { post } = useForm();
     
@@ -119,9 +124,9 @@ export default function Navbar({ auth }: NavbarProps) {
                     w-full max-w-7xl transition-all duration-300
                     ${scrolled 
                         ? "bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm rounded-2xl" 
-                        : "bg-white/0 dark:bg-zinc-900/0 backdrop-blur-none border-b border-transparent" // Transparent at top
+                        : "bg-white/0 dark:bg-zinc-900/0 backdrop-blur-none border-b border-transparent"
                     }
-                    ${!scrolled && "border-b border-zinc-100 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 backdrop-blur-sm"} // Line when not scrolled but not floating
+                    ${!scrolled && "border-b border-zinc-100 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 backdrop-blur-sm"}
                 `}
             >
                 <div className="px-4 md:px-6 h-16 flex items-center justify-between">
@@ -137,17 +142,18 @@ export default function Navbar({ auth }: NavbarProps) {
                             </span>
                         </Link>
 
-                        {/* Desktop Menu (Clean Links) */}
+                        {/* Desktop Menu */}
                         <div className="hidden md:flex items-center gap-6">
-                            <NavLink href="/" active={url === "/"}>Home</NavLink>
-                            <NavLink href="/books" active={isActive("/books")}>Buku</NavLink>
-                            <NavLink href="/categories" active={isActive("/categories")}>Kategori</NavLink>
+                            {/* [TRANSLATE] Menu Items */}
+                            <NavLink href="/" active={url === "/"}>{t("Home")}</NavLink>
+                            <NavLink href="/books" active={isActive("/books")}>{t("Books")}</NavLink>
+                            <NavLink href="/categories" active={isActive("/categories")}>{t("Categories")}</NavLink>
                         </div>
                     </div>
 
                     {/* --- RIGHT: ACTIONS --- */}
                     <div className="hidden md:flex items-center gap-4">
-                        {/* Theme Toggle (Simple Icon) */}
+                        {/* Theme Toggle */}
                         <button
                             onClick={toggleDarkMode}
                             className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
@@ -161,11 +167,12 @@ export default function Navbar({ auth }: NavbarProps) {
                         {/* Auth Section */}
                         {!auth.user ? (
                             <div className="flex items-center gap-3">
+                                {/* [TRANSLATE] Auth Buttons */}
                                 <Link href="/login" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors">
-                                    Log in
+                                    {t("Log in")}
                                 </Link>
                                 <Link href="/register" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 rounded-lg shadow-md shadow-indigo-500/20 transition-all hover:-translate-y-0.5">
-                                    Sign up
+                                    {t("Sign up")}
                                 </Link>
                             </div>
                         ) : (
@@ -191,22 +198,24 @@ export default function Navbar({ auth }: NavbarProps) {
                                             className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-zinc-100 dark:border-zinc-800 overflow-hidden py-1 z-50 origin-top-right"
                                         >
                                             <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
-                                                <p className="text-xs font-medium text-zinc-400">Halo,</p>
+                                                {/* [TRANSLATE] Hello */}
+                                                <p className="text-xs font-medium text-zinc-400">{t("Hello")},</p>
                                                 <p className="text-sm font-semibold text-zinc-900 dark:text-white truncate">{auth.user.name.split(" ")[0]}</p>
                                             </div>
                                             
                                             <div className="py-1">
+                                                {/* [TRANSLATE] Dropdown Items */}
                                                 <Link href="/dashboard" className="flex items-center gap-2 px-4 py-2 text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
-                                                    <Icons.Dashboard className="w-4 h-4" /> Dashboard
+                                                    <Icons.Dashboard className="w-4 h-4" /> {t("Dashboard")}
                                                 </Link>
                                                 <Link href="/bookmarks" className="flex items-center gap-2 px-4 py-2 text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
-                                                    <Icons.Bookmark className="w-4 h-4" /> Bookmarks
+                                                    <Icons.Bookmark className="w-4 h-4" /> {t("Bookmarks")}
                                                 </Link>
                                             </div>
 
                                             <div className="border-t border-zinc-100 dark:border-zinc-800 py-1">
                                                 <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors text-left">
-                                                    <Icons.Logout className="w-4 h-4" /> Log out
+                                                    <Icons.Logout className="w-4 h-4" /> {t("Log out")}
                                                 </button>
                                             </div>
                                         </motion.div>
@@ -237,22 +246,24 @@ export default function Navbar({ auth }: NavbarProps) {
                             className="overflow-hidden border-t border-zinc-100 dark:border-zinc-800 md:hidden bg-white dark:bg-zinc-900"
                         >
                             <div className="p-4 space-y-1">
-                                <MobileNavLink href="/" active={url === "/"} icon={Icons.Dashboard}>Home</MobileNavLink>
-                                <MobileNavLink href="/books" active={isActive("/books")} icon={({className}:{className?:string})=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>}>Buku</MobileNavLink>
+                                {/* [TRANSLATE] Mobile Links */}
+                                <MobileNavLink href="/" active={url === "/"} icon={Icons.Dashboard}>{t("Home")}</MobileNavLink>
+                                <MobileNavLink href="/books" active={isActive("/books")} icon={({className}:{className?:string})=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>}>{t("Books")}</MobileNavLink>
                                 
                                 <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-2"></div>
                                 
                                 {!auth.user ? (
                                     <div className="grid grid-cols-2 gap-3 pt-2">
-                                        <Link href="/login" className="flex justify-center px-4 py-2.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium text-sm">Log in</Link>
-                                        <Link href="/register" className="flex justify-center px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium text-sm">Sign up</Link>
+                                        {/* [TRANSLATE] Mobile Auth */}
+                                        <Link href="/login" className="flex justify-center px-4 py-2.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium text-sm">{t("Log in")}</Link>
+                                        <Link href="/register" className="flex justify-center px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium text-sm">{t("Sign up")}</Link>
                                     </div>
                                 ) : (
                                     <>
-                                        <MobileNavLink href="/dashboard" active={isActive("/dashboard")} icon={Icons.Dashboard}>Dashboard</MobileNavLink>
-                                        <MobileNavLink href="/bookmarks" active={isActive("/bookmarks")} icon={Icons.Bookmark}>Bookmarks</MobileNavLink>
+                                        <MobileNavLink href="/dashboard" active={isActive("/dashboard")} icon={Icons.Dashboard}>{t("Dashboard")}</MobileNavLink>
+                                        <MobileNavLink href="/bookmarks" active={isActive("/bookmarks")} icon={Icons.Bookmark}>{t("Bookmarks")}</MobileNavLink>
                                         <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-left">
-                                            <Icons.Logout className="w-4 h-4" /> Log out
+                                            <Icons.Logout className="w-4 h-4" /> {t("Log out")}
                                         </button>
                                     </>
                                 )}

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest; // Optional: jika pakai FormRequest
+use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Models\User; // Pastikan import Model User
+use App\Models\User;
 
 class ProfileController extends Controller
 {
@@ -39,7 +39,7 @@ class ProfileController extends Controller
         // Update data user
         $request->user()->fill($validated);
 
-        // Jika email berubah, reset verifikasi email (opsional, tergantung kebutuhan)
+        // Jika email berubah, reset verifikasi email
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }
@@ -51,7 +51,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Delete akun user (Opsional, jika ingin fitur hapus akun).
+     * Delete akun user.
      */
     public function destroy(Request $request): RedirectResponse
     {
@@ -69,5 +69,28 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+    /**
+     * Update Bahasa / Locale User (METHOD BARU)
+     */
+    public function updateLocale(Request $request): RedirectResponse
+    {
+        // 1. Validasi input (hanya terima 'id' atau 'en')
+        $validated = $request->validate([
+            'locale' => ['required', 'string', 'in:id,en'],
+        ]);
+
+        // 2. Update kolom 'locale' di tabel users
+        // Pastikan Anda sudah membuat migration untuk kolom 'locale'
+        $request->user()->fill($validated);
+        $request->user()->save();
+
+        // 3. Simpan ke session agar middleware langsung mendeteksi perubahan
+        // tanpa perlu user logout-login
+        session()->put('locale', $validated['locale']);
+
+        // 4. Redirect kembali (frontend akan melakukan reload)
+        return Redirect::back();
     }
 }

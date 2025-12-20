@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link } from '@inertiajs/react';
+// 1. IMPORT HOOK
+import useTranslation from "@/hooks/UseTranslation";
 
 // --- COMPONENTS ---
 const SocialIcon = ({ path, label }: { path: string, label: string }) => (
@@ -33,6 +35,9 @@ const FooterHeading = ({ children }: { children: React.ReactNode }) => (
 
 // --- MAIN FOOTER ---
 const Footer: React.FC = () => {
+  // 2. PANGGIL HOOK
+  const { t } = useTranslation();
+
   return (
     <footer className="relative bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-900 pt-16 pb-8 overflow-hidden">
       
@@ -54,7 +59,8 @@ const Footer: React.FC = () => {
             </Link>
             
             <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-sm">
-              Platform perpustakaan digital masa depan. Temukan ribuan buku, simpan koleksi favoritmu, dan nikmati pengalaman membaca tanpa batas di mana saja.
+              {/* [TRANSLATE] */}
+              {t("Future digital library platform. Discover thousands of books, save your favorite collections, and enjoy unlimited reading experiences anywhere.")}
             </p>
 
             <div className="flex gap-3 pt-2">
@@ -66,34 +72,37 @@ const Footer: React.FC = () => {
 
           {/* COLUMN 2 */}
           <div>
-            <FooterHeading>Jelajahi</FooterHeading>
+            {/* [TRANSLATE] */}
+            <FooterHeading>{t("Explore")}</FooterHeading>
             <ul className="space-y-4">
-              <FooterLink href="/">Beranda</FooterLink>
-              <FooterLink href="/books">Koleksi Buku</FooterLink>
-              <FooterLink href="/categories">Kategori</FooterLink>
-              <FooterLink href="/bookmarks">Bookmark</FooterLink>
+              <FooterLink href="/">{t("Home")}</FooterLink>
+              <FooterLink href="/books">{t("Book Collection")}</FooterLink>
+              <FooterLink href="/categories">{t("Categories")}</FooterLink>
+              <FooterLink href="/bookmarks">{t("Bookmarks")}</FooterLink>
             </ul>
           </div>
 
           {/* COLUMN 3 */}
           <div>
-            <FooterHeading>Populer</FooterHeading>
+            {/* [TRANSLATE] */}
+            <FooterHeading>{t("Popular")}</FooterHeading>
             <ul className="space-y-4">
-              <FooterLink href="/books?cat=teknologi">Teknologi</FooterLink>
-              <FooterLink href="/books?cat=sains">Sains Alam</FooterLink>
-              <FooterLink href="/books?cat=sejarah">Sejarah</FooterLink>
-              <FooterLink href="/books?cat=fiksi">Fiksi & Novel</FooterLink>
+              <FooterLink href="/books?cat=teknologi">{t("Technology")}</FooterLink>
+              <FooterLink href="/books?cat=sains">{t("Science")}</FooterLink>
+              <FooterLink href="/books?cat=sejarah">{t("History")}</FooterLink>
+              <FooterLink href="/books?cat=fiksi">{t("Fiction & Novels")}</FooterLink>
             </ul>
           </div>
 
           {/* COLUMN 4 */}
           <div>
-            <FooterHeading>Perusahaan</FooterHeading>
+            {/* [TRANSLATE] */}
+            <FooterHeading>{t("Company")}</FooterHeading>
             <ul className="space-y-4">
-              <FooterLink href="#">Tentang Kami</FooterLink>
-              <FooterLink href="#">Karir</FooterLink>
-              <FooterLink href="#">Blog</FooterLink>
-              <FooterLink href="#">Kontak</FooterLink>
+              <FooterLink href="#">{t("About Us")}</FooterLink>
+              <FooterLink href="#">{t("Careers")}</FooterLink>
+              <FooterLink href="#">{t("Blog")}</FooterLink>
+              <FooterLink href="#">{t("Contact")}</FooterLink>
             </ul>
           </div>
 
@@ -102,13 +111,15 @@ const Footer: React.FC = () => {
         {/* BOTTOM BAR */}
         <div className="pt-8 border-t border-gray-100 dark:border-gray-900 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
           <p className="text-xs text-gray-400 dark:text-gray-500">
-            &copy; {new Date().getFullYear()} Litera.id. Hak Cipta Dilindungi.
+            {/* [TRANSLATE] */}
+            &copy; {new Date().getFullYear()} Litera.id. {t("All rights reserved.")}
           </p>
           
           <div className="flex gap-6 text-xs text-gray-400 dark:text-gray-500">
-            <a href="#" className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Privacy</a>
-            <a href="#" className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Terms</a>
-            <a href="#" className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Cookies</a>
+            {/* [TRANSLATE] */}
+            <a href="#" className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">{t("Privacy")}</a>
+            <a href="#" className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">{t("Terms")}</a>
+            <a href="#" className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">{t("Cookies")}</a>
           </div>
         </div>
       </div>

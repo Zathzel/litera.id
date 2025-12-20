@@ -1,6 +1,8 @@
 import { usePage, Link, router } from "@inertiajs/react";
 import DashboardLayout from "@/layouts/dashboard/DashboardLayout";
 import { useState } from "react";
+// 1. IMPORT HOOK
+import useTranslation from "@/hooks/UseTranslation";
 
 // --- Types ---
 interface Book {
@@ -35,10 +37,14 @@ export default function Index() {
   const pageProps = usePage().props;
   const processing = pageProps.processing as boolean;
 
+  // 2. PANGGIL HOOK
+  const { t } = useTranslation();
+
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const handleDelete = (id: number) => {
-    if (!confirm("Yakin ingin menghapus buku ini?")) return;
+    // [TRANSLATE] Confirm
+    if (!confirm(t("Are you sure you want to delete this book?"))) return;
 
     setDeletingId(id);
 
@@ -55,10 +61,12 @@ export default function Index() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
             <h1 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
-            📚 Daftar Buku
+            {/* [TRANSLATE] Title */}
+            📚 {t("Book List")}
             </h1>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Kelola koleksi perpustakaan digital Anda.
+                {/* [TRANSLATE] Desc */}
+                {t("Manage your digital library collection.")}
             </p>
         </div>
 
@@ -67,7 +75,8 @@ export default function Index() {
           className="group inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 transition-all duration-200 ease-in-out hover:-translate-y-0.5 active:scale-95"
         >
           <Icons.Plus />
-          <span>Tambah Buku</span>
+          {/* [TRANSLATE] Button */}
+          <span>{t("Add Book")}</span>
         </Link>
       </div>
 
@@ -78,16 +87,16 @@ export default function Index() {
             <thead className="bg-gray-50/50 dark:bg-gray-700/50">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
-                  Cover
+                  {t("Cover")}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
-                  Detail Buku
+                  {t("Book Details")}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
-                  Kategori
+                  {t("Category")}
                 </th>
                 <th className="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
-                  Aksi
+                  {t("Action")}
                 </th>
               </tr>
             </thead>
@@ -123,7 +132,8 @@ export default function Index() {
                           {book.title}
                         </div>
                         <div className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-0.5">
-                          by {book.author || "Unknown Author"}
+                          {/* [TRANSLATE] by */}
+                          {t("by")} {book.author || t("Unknown Author")}
                         </div>
                         {book.description && (
                           <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 line-clamp-2 leading-relaxed">
@@ -136,7 +146,7 @@ export default function Index() {
                     {/* Kolom Kategori */}
                     <td className="px-6 py-4 whitespace-nowrap align-top pt-6">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-800">
-                        {book.category?.name || "Uncategorized"}
+                        {book.category?.name || t("Uncategorized")}
                       </span>
                     </td>
 
@@ -147,7 +157,7 @@ export default function Index() {
                         <Link
                           href={`/dashboard/books/${book.id}/edit`}
                           className="p-2 text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-white bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/50 rounded-lg transition-all"
-                          title="Edit Buku"
+                          title={t("Edit Book")}
                         >
                           <Icons.Pencil />
                         </Link>
@@ -161,7 +171,7 @@ export default function Index() {
                                 ? "bg-red-50 text-red-400 cursor-not-allowed" 
                                 : "text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/50"
                           }`}
-                          title="Hapus Buku"
+                          title={t("Delete Book")}
                         >
                           {deletingId === book.id ? (
                             <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -182,16 +192,16 @@ export default function Index() {
                   <td colSpan={4} className="px-6 py-20 text-center">
                     <div className="flex flex-col items-center justify-center">
                       <Icons.BookOpen />
-                      <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">Belum ada buku</h3>
+                      <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">{t("No books yet")}</h3>
                       <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-sm">
-                        Mulai tambahkan koleksi buku digital Anda untuk ditampilkan di perpustakaan.
+                        {t("Start adding your digital book collection to display in the library.")}
                       </p>
                       <Link
                         href="/dashboard/books/create"
                         className="mt-6 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
                       >
                         <Icons.Plus />
-                        <span className="ml-2">Tambah Buku Sekarang</span>
+                        <span className="ml-2">{t("Add Book Now")}</span>
                       </Link>
                     </div>
                   </td>

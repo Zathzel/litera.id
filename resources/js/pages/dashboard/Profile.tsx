@@ -1,6 +1,8 @@
 import DashboardLayout from "@/layouts/dashboard/DashboardLayout";
 import { useForm, usePage } from "@inertiajs/react";
 import { FormEventHandler, useRef } from "react";
+// 1. Import Hook Translation
+import useTranslation from "@/hooks/UseTranslation"; 
 
 // --- Tipe Data ---
 interface User {
@@ -8,17 +10,23 @@ interface User {
   name: string;
   email: string;
   avatar?: string;
+  locale?: string;
 }
 
 interface PageProps {
   auth: {
     user: User;
   };
+  locale?: string; 
   [key: string]: any;
 }
 
 export default function Profile() {
-  const user = usePage<PageProps>().props.auth.user;
+  const { auth, locale } = usePage<PageProps>().props;
+  const user = auth.user;
+
+  // 2. Panggil Hook Translation
+  const { t } = useTranslation(); 
 
   // --- FORM 1: Update Profil ---
   const { 
@@ -35,8 +43,6 @@ export default function Profile() {
 
   const submitProfile: FormEventHandler = (e) => {
     e.preventDefault();
-    // MENGGUNAKAN URL STRING (Bukan route())
-    // Pastikan route ini ada di web.php Anda. Standar Laravel Breeze adalah '/profile'
     patchProfile('/profile'); 
   };
 
@@ -60,7 +66,6 @@ export default function Profile() {
 
   const submitPassword: FormEventHandler = (e) => {
     e.preventDefault();
-    // MENGGUNAKAN URL STRING. Standar Laravel biasanya '/password' atau '/user/password'
     putPassword('/password', {
       preserveScroll: true,
       onSuccess: () => resetPassword(),
@@ -77,34 +82,53 @@ export default function Profile() {
     });
   };
 
+  // --- FORM 3: Update Bahasa ---
+  const {
+    data: dataLang,
+    setData: setDataLang,
+    patch: patchLang,
+    processing: processingLang,
+    recentlySuccessful: recentlySuccessfulLang
+  } = useForm({
+    locale: user.locale || locale || 'id', 
+  });
+
+  const submitLanguage: FormEventHandler = (e) => {
+    e.preventDefault();
+    patchLang('/profile/locale', {
+        onSuccess: () => {
+            window.location.reload(); 
+        }
+    });
+  };
+
   return (
     <DashboardLayout>
-      {/* --- HEADER (Style match Index.tsx) --- */}
+      {/* --- HEADER --- */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h1 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-          ⚙️ Pengaturan Akun
+          ⚙️ {t("Account Settings")}
         </h1>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-6 pb-10">
         
         {/* --- CARD 1: Informasi Profil --- */}
         <div className="bg-white dark:bg-gray-800 shadow-xl rounded-xl overflow-hidden">
           <div className="p-6 md:p-8">
             <header className="mb-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                Informasi Profil
+                {t("Profile Information")}
                 </h2>
                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                Perbarui nama akun dan alamat email Anda.
+                {t("Update your account's profile information and email address.")}
                 </p>
             </header>
 
             <form onSubmit={submitProfile} className="space-y-6 max-w-xl">
-                {/* Nama */}
                 <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Nama Lengkap
+                    {t("Full Name")}
                 </label>
                 <input
                     id="name"
@@ -117,10 +141,9 @@ export default function Profile() {
                 {errorsProfile.name && <p className="text-red-500 text-sm mt-1">{errorsProfile.name}</p>}
                 </div>
 
-                {/* Email */}
                 <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Email
+                    {t("Email")}
                 </label>
                 <input
                     id="email"
@@ -133,19 +156,18 @@ export default function Profile() {
                 {errorsProfile.email && <p className="text-red-500 text-sm mt-1">{errorsProfile.email}</p>}
                 </div>
 
-                {/* Action Button */}
                 <div className="flex items-center gap-4">
                 <button
                     type="submit"
                     disabled={processingProfile}
                     className="inline-flex items-center px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow-md transition duration-150 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:hover:scale-100"
                 >
-                    {processingProfile ? "Menyimpan..." : "Simpan Profil"}
+                    {processingProfile ? t("Saving...") : t("Save Profile")}
                 </button>
 
                 {recentlySuccessfulProfile && (
                     <span className="text-sm text-green-600 dark:text-green-400 font-medium animate-pulse">
-                    ✓ Tersimpan.
+                    ✓ {t("Saved.")}
                     </span>
                 )}
                 </div>
@@ -158,18 +180,17 @@ export default function Profile() {
           <div className="p-6 md:p-8">
             <header className="mb-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                Ganti Password
+                {t("Update Password")}
                 </h2>
                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                Pastikan akun Anda aman dengan menggunakan password yang kuat.
+                {t("Ensure your account is using a long, random password to stay secure.")}
                 </p>
             </header>
 
             <form onSubmit={submitPassword} className="space-y-6 max-w-xl">
-                {/* Password Saat Ini */}
                 <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Password Saat Ini
+                    {t("Current Password")}
                 </label>
                 <input
                     ref={currentPasswordInput}
@@ -184,10 +205,9 @@ export default function Profile() {
                 )}
                 </div>
 
-                {/* Password Baru */}
                 <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Password Baru
+                    {t("New Password")}
                 </label>
                 <input
                     ref={passwordInput}
@@ -202,10 +222,9 @@ export default function Profile() {
                 )}
                 </div>
 
-                {/* Konfirmasi Password */}
                 <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Konfirmasi Password
+                    {t("Confirm Password")}
                 </label>
                 <input
                     id="password_confirmation"
@@ -219,25 +238,108 @@ export default function Profile() {
                 )}
                 </div>
 
-                {/* Action Button */}
                 <div className="flex items-center gap-4">
                 <button
                     type="submit"
                     disabled={processingPassword}
                     className="inline-flex items-center px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow-md transition duration-150 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:hover:scale-100"
                 >
-                    {processingPassword ? "Memperbarui..." : "Update Password"}
+                    {processingPassword ? t("Updating...") : t("Update Password")}
                 </button>
 
                 {recentlySuccessfulPassword && (
                     <span className="text-sm text-green-600 dark:text-green-400 font-medium animate-pulse">
-                    ✓ Password diperbarui.
+                    ✓ {t("Password Updated.")}
                     </span>
                 )}
                 </div>
             </form>
           </div>
         </div>
+
+        {/* --- CARD 3: Pengaturan Bahasa --- */}
+        <div className="bg-white dark:bg-gray-800 shadow-xl rounded-xl overflow-hidden">
+          <div className="p-6 md:p-8">
+            <header className="mb-6">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                {t("Language & Preferences")}
+                </h2>
+                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                {t("Select the language you want to use for the application interface.")}
+                </p>
+            </header>
+
+            <form onSubmit={submitLanguage} className="space-y-6 max-w-xl">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {t("Select Language")}
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Pilihan Bahasa Indonesia */}
+                        <label className={`relative flex items-center p-4 border rounded-xl cursor-pointer transition-all ${dataLang.locale === 'id' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-500' : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300'}`}>
+                            <input 
+                                type="radio" 
+                                name="locale" 
+                                value="id" 
+                                checked={dataLang.locale === 'id'} 
+                                onChange={(e) => setDataLang("locale", e.target.value)}
+                                className="sr-only" 
+                            />
+                            <span className="text-2xl mr-3">🇮🇩</span>
+                            <div>
+                                <span className="block font-bold text-gray-900 dark:text-white">Indonesia</span>
+                                <span className="block text-xs text-gray-500 dark:text-gray-400">Bahasa Indonesia</span>
+                            </div>
+                            {dataLang.locale === 'id' && (
+                                <div className="absolute top-4 right-4 text-indigo-600 dark:text-indigo-400">
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                </div>
+                            )}
+                        </label>
+
+                        {/* Pilihan Bahasa Inggris */}
+                        <label className={`relative flex items-center p-4 border rounded-xl cursor-pointer transition-all ${dataLang.locale === 'en' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-500' : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300'}`}>
+                            <input 
+                                type="radio" 
+                                name="locale" 
+                                value="en" 
+                                checked={dataLang.locale === 'en'} 
+                                onChange={(e) => setDataLang("locale", e.target.value)}
+                                className="sr-only" 
+                            />
+                            <span className="text-2xl mr-3">🇺🇸</span>
+                            <div>
+                                <span className="block font-bold text-gray-900 dark:text-white">English</span>
+                                <span className="block text-xs text-gray-500 dark:text-gray-400">United States</span>
+                            </div>
+                            {dataLang.locale === 'en' && (
+                                <div className="absolute top-4 right-4 text-indigo-600 dark:text-indigo-400">
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                </div>
+                            )}
+                        </label>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                    <button
+                        type="submit"
+                        disabled={processingLang}
+                        className="inline-flex items-center px-6 py-2 bg-gray-900 dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 text-white font-medium rounded-xl shadow-md transition duration-150 ease-in-out transform hover:scale-105 focus:outline-none disabled:opacity-50 disabled:hover:scale-100"
+                    >
+                        {processingLang ? t("Changing...") : t("Save Language")}
+                    </button>
+
+                    {recentlySuccessfulLang && (
+                        <span className="text-sm text-green-600 dark:text-green-400 font-medium animate-pulse">
+                        ✓ {t("Language Changed.")}
+                        </span>
+                    )}
+                </div>
+            </form>
+          </div>
+        </div>
+
       </div>
     </DashboardLayout>
   );

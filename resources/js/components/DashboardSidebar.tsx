@@ -1,12 +1,14 @@
 import { motion } from "framer-motion";
 import { Link, router, usePage } from "@inertiajs/react";
 import { useState, useEffect } from "react";
+// 1. IMPORT HOOK TRANSLASI
+import useTranslation from "@/hooks/UseTranslation"; 
 
-// --- 1. ICON SET ---
+// --- 1. ICON SET (TETAP SAMA) ---
 const Icons = {
   Dashboard: ({ className }: { className?: string }) => (
     <svg className={className || "w-5 h-5"} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
     </svg>
   ),
   Book: ({ className }: { className?: string }) => (
@@ -56,9 +58,8 @@ const Icons = {
   ),
 };
 
-// --- 2. COMPONENTS ---
+// --- 2. COMPONENTS (TETAP SAMA) ---
 
-// NavItem dengan Desain Baru
 const NavItem = ({ href, icon: Icon, label, active }: { href: string; icon: any; label: string; active: boolean }) => {
   return (
     <Link href={href} className="relative block group mb-1">
@@ -77,7 +78,6 @@ const NavItem = ({ href, icon: Icon, label, active }: { href: string; icon: any;
             : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50/80 dark:hover:bg-gray-800/30 rounded-r-xl mr-2"
         }`}
       >
-        {/* Icon dengan efek glow halus saat active */}
         <div className={`${active ? "drop-shadow-md text-indigo-600 dark:text-indigo-400" : ""}`}>
             <Icon className="w-5 h-5" />
         </div>
@@ -87,7 +87,6 @@ const NavItem = ({ href, icon: Icon, label, active }: { href: string; icon: any;
   );
 };
 
-// Section Divider (Pemisah Menu)
 const MenuSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <div className="mb-6">
         <h3 className="px-5 mb-2 text-[10px] font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none">
@@ -97,7 +96,7 @@ const MenuSection = ({ title, children }: { title: string; children: React.React
     </div>
 );
 
-// --- 3. INTERFACES ---
+// --- 3. INTERFACES (TETAP SAMA) ---
 interface MenuItem {
     label: string;
     href: string;
@@ -121,6 +120,9 @@ export default function DashboardSidebar() {
   const { url, props } = usePage<PageProps>(); 
   const { auth } = props; 
   const isAdmin = auth.user.role === 'admin'; 
+
+  // 2. PANGGIL HOOK
+  const { t } = useTranslation();
 
   // --- Dark Mode Logic ---
   const [darkMode, setDarkMode] = useState(false);
@@ -157,21 +159,24 @@ export default function DashboardSidebar() {
   };
 
   // 1. Menu Umum (Overview)
+  // [TRANSLATE] - Gunakan t() untuk label
   const commonMenuItems: MenuItem[] = [
-    { label: isAdmin ? "Dashboard Home" : "Ringkasan", href: "/dashboard", icon: Icons.Dashboard, exact: true },
+    { label: isAdmin ? t("Dashboard Home") : t("Summary"), href: "/dashboard", icon: Icons.Dashboard, exact: true },
   ];
 
   // 2. Menu Admin (Administration)
+  // [TRANSLATE]
   const adminMenuItems: MenuItem[] = [
-    { label: "Kelola Buku", href: "/dashboard/books", icon: Icons.Book },
-    { label: "Kelola Kategori", href: "/dashboard/categories", icon: Icons.Category },
-    { label: "Kelola User", href: "/dashboard/users", icon: Icons.Users },
+    { label: t("Manage Books"), href: "/dashboard/books", icon: Icons.Book },
+    { label: t("Manage Categories"), href: "/dashboard/categories", icon: Icons.Category },
+    { label: t("Manage Users"), href: "/dashboard/users", icon: Icons.Users },
   ];
 
   // 3. Menu User (Personal)
+  // [TRANSLATE]
   const personalMenuItems: MenuItem[] = [
-    { label: "Bookmark Saya", href: "/dashboard/bookmarks", icon: Icons.Bookmark }, 
-    { label: "Profile & Settings", href: "/profile", icon: Icons.User }, 
+    { label: t("My Bookmarks"), href: "/dashboard/bookmarks", icon: Icons.Bookmark }, 
+    { label: t("Profile & Settings"), href: "/profile", icon: Icons.User }, 
   ];
 
   return (
@@ -192,7 +197,8 @@ export default function DashboardSidebar() {
                     Litera<span className="text-indigo-600 dark:text-indigo-400">.id</span>
                 </span>
                 <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">
-                    {isAdmin ? "Admin Panel" : "Reader Space"}
+                    {/* [TRANSLATE] Role Label */}
+                    {isAdmin ? t("Admin Panel") : t("Reader Space")}
                 </span>
            </div>
         </Link>
@@ -201,20 +207,21 @@ export default function DashboardSidebar() {
       {/* --- NAVIGATION SCROLL AREA --- */}
       <nav className="flex-1 overflow-y-auto py-6 custom-scrollbar space-y-2">
         
-        {/* 1. Overview Section (Selalu Muncul) */}
-        <MenuSection title="Overview">
+        {/* 1. Overview Section */}
+        {/* [TRANSLATE] Section Title */}
+        <MenuSection title={t("Overview")}>
             {commonMenuItems.map((item) => (
                 <NavItem key={item.href} {...item} active={isActive(item.href, item.exact)} />
             ))}
         </MenuSection>
 
-        {/* 2. Admin Section (Hanya Jika Admin) */}
+        {/* 2. Admin Section */}
         {isAdmin && (
             <div className="relative">
-                {/* Garis Pemisah Halus */}
                 <div className="mx-5 my-4 border-t border-dashed border-gray-200 dark:border-gray-700/50" />
                 
-                <MenuSection title="Administrator">
+                {/* [TRANSLATE] Section Title */}
+                <MenuSection title={t("Administrator")}>
                     {adminMenuItems.map((item) => (
                         <NavItem key={item.href} {...item} active={isActive(item.href, item.exact)} />
                     ))}
@@ -222,11 +229,12 @@ export default function DashboardSidebar() {
             </div>
         )}
 
-        {/* 3. Personal Section (Garis Pemisah & Menu) */}
+        {/* 3. Personal Section */}
         <div className="relative">
             <div className="mx-5 my-4 border-t border-dashed border-gray-200 dark:border-gray-700/50" />
             
-            <MenuSection title="Personal Area">
+            {/* [TRANSLATE] Section Title */}
+            <MenuSection title={t("Personal Area")}>
                 {personalMenuItems.map((item) => (
                     <NavItem key={item.href} {...item} active={isActive(item.href, item.exact)} />
                 ))}
@@ -242,20 +250,20 @@ export default function DashboardSidebar() {
             <Link
                 href="/"
                 className="flex flex-col items-center justify-center p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all group shadow-sm"
-                title="Halaman Depan"
+                title={t("Home Page")}
             >
                 <Icons.Home className="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-bold">Home</span>
+                <span className="text-[10px] font-bold">{t("Home")}</span>
             </Link>
 
             {/* Dark Mode Button */}
             <button
                 onClick={toggleDarkMode}
                 className="flex flex-col items-center justify-center p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all group shadow-sm"
-                title="Ganti Tema"
+                title={t("Switch Theme")}
             >
                 {darkMode ? <Icons.Moon className="w-5 h-5 mb-1" /> : <Icons.Sun className="w-5 h-5 mb-1" />}
-                <span className="text-[10px] font-bold">{darkMode ? "Dark" : "Light"}</span>
+                <span className="text-[10px] font-bold">{darkMode ? t("Dark") : t("Light")}</span>
             </button>
         </div>
 
@@ -265,7 +273,7 @@ export default function DashboardSidebar() {
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-red-600 bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-xl transition-all border border-transparent hover:border-red-200"
         >
             <Icons.Logout className="w-4 h-4" />
-            <span>Keluar Sesi</span>
+            <span>{t("Sign Out")}</span>
         </button>
       </div>
     </motion.aside>

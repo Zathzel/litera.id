@@ -43,6 +43,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // 3. Profile & Settings
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    
+    // --- ROUTE BARU: UPDATE BAHASA ---
+    Route::patch('/profile/locale', [ProfileController::class, 'updateLocale'])->name('profile.locale.update');
 
     // --- DASHBOARD AREA ---
     Route::prefix('dashboard')->name('dashboard.')->group(function () {

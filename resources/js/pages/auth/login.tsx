@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+// 1. IMPORT HOOK
+import useTranslation from "@/hooks/UseTranslation";
 
 // --- GLOBAL TYPE ---
 declare global {
@@ -27,7 +29,7 @@ interface LoginProps {
     canRegister: boolean;
 }
 
-// --- ICONS ---
+// --- ICONS (TETAP SAMA) ---
 const Icons = {
     Mail: ({ className }: { className?: string }) => (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
@@ -46,11 +48,10 @@ const Icons = {
     )
 };
 
-// --- ANIMATED ILLUSTRATION ---
+// --- ANIMATED ILLUSTRATION (TETAP SAMA) ---
 const AnimatedBook = () => {
     return (
         <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-zinc-900">
-            {/* 1. Background Gradient Blob */}
             <motion.div 
                 animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
                 transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
@@ -58,7 +59,6 @@ const AnimatedBook = () => {
             />
 
             <svg viewBox="0 0 400 400" className="w-full max-w-md h-auto relative z-10 drop-shadow-2xl">
-                {/* 2. Floating Elements (Particles) */}
                 {[...Array(6)].map((_, i) => (
                     <motion.rect 
                         key={i}
@@ -82,7 +82,6 @@ const AnimatedBook = () => {
                     />
                 ))}
 
-                {/* 3. The Book (Stroke Animation) */}
                 <motion.g 
                     initial={{ y: 10 }} 
                     animate={{ y: -10 }} 
@@ -126,11 +125,14 @@ const AnimatedBook = () => {
 };
 
 export default function Login({ status, canResetPassword, canRegister }: LoginProps) {
+    // 2. PANGGIL HOOK
+    const { t } = useTranslation();
     const [showPassword, setShowPassword] = useState(false);
 
     return (
         <div className="min-h-screen w-full grid lg:grid-cols-2 font-sans text-zinc-900 dark:text-zinc-100 bg-white dark:bg-black selection:bg-purple-500/30">
-            <Head title="Masuk ke Akun" />
+            {/* [TRANSLATE] */}
+            <Head title={t("Login to Account")} />
 
             {/* --- LEFT COLUMN: FORM AREA --- */}
             <div className="flex flex-col justify-center items-center p-8 sm:p-12 lg:p-24 relative bg-white dark:bg-zinc-950">
@@ -150,7 +152,8 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                             animate={{ opacity: 1, y: 0 }}
                             className="text-3xl md:text-4xl font-bold tracking-tight"
                         >
-                            Selamat Datang Kembali
+                            {/* [TRANSLATE] */}
+                            {t("Welcome Back")}
                         </motion.h1>
                         <motion.p 
                             initial={{ opacity: 0, y: 10 }}
@@ -158,7 +161,8 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                             transition={{ delay: 0.1 }}
                             className="text-zinc-500 dark:text-zinc-400"
                         >
-                            Masukkan detail akun Anda untuk melanjutkan membaca.
+                            {/* [TRANSLATE] */}
+                            {t("Enter your account details to continue reading.")}
                         </motion.p>
                     </div>
 
@@ -191,7 +195,8 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                                 <>
                                     {/* Email Input */}
                                     <div className="space-y-2">
-                                        <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+                                        {/* [TRANSLATE] */}
+                                        <Label htmlFor="email" className="text-sm font-medium">{t("Email")}</Label>
                                         <div className="relative group">
                                             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-indigo-500 transition-colors z-10">
                                                 <Icons.Mail className="w-5 h-5" />
@@ -214,14 +219,16 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                                     {/* Password Input */}
                                     <div className="space-y-2">
                                         <div className="flex items-center justify-between">
-                                            <Label htmlFor="password">Password</Label>
+                                            {/* [TRANSLATE] */}
+                                            <Label htmlFor="password">{t("Password")}</Label>
                                             {canResetPassword && (
                                                 <TextLink
                                                     href={request()}
                                                     className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
                                                     tabIndex={4}
                                                 >
-                                                    Lupa password?
+                                                    {/* [TRANSLATE] */}
+                                                    {t("Forgot password?")}
                                                 </TextLink>
                                             )}
                                         </div>
@@ -260,11 +267,13 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                                         {processing ? (
                                             <>
                                                 <Spinner className="mr-2 h-4 w-4" />
-                                                Memproses...
+                                                {/* [TRANSLATE] */}
+                                                {t("Processing...")}
                                             </>
                                         ) : (
                                             <span className="flex items-center gap-2">
-                                                Masuk
+                                                {/* [TRANSLATE] */}
+                                                {t("Log In")}
                                                 <Icons.ArrowRight className="w-4 h-4" />
                                             </span>
                                         )}
@@ -273,13 +282,15 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                                     {/* Register Link */}
                                     {canRegister && (
                                         <div className="text-center text-sm">
-                                            <span className="text-zinc-500 dark:text-zinc-400">Belum punya akun? </span>
+                                            {/* [TRANSLATE] */}
+                                            <span className="text-zinc-500 dark:text-zinc-400">{t("Don't have an account?")} </span>
                                             <TextLink
                                                 href={register()}
                                                 className="font-bold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 hover:underline underline-offset-4 transition-all"
                                                 tabIndex={5}
                                             >
-                                                Daftar Sekarang
+                                                {/* [TRANSLATE] */}
+                                                {t("Register Now")}
                                             </TextLink>
                                         </div>
                                     )}
@@ -310,13 +321,15 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                 <div className="absolute bottom-12 left-12 z-20 max-w-lg pointer-events-none">
                     <blockquote className="space-y-4">
                         <p className="text-2xl font-serif leading-relaxed text-zinc-200">
-                            "Aku selalu membayangkan bahwa Surga itu pastilah sejenis perpustakaan."
+                            {/* [TRANSLATE] */}
+                            "{t("I have always imagined that Paradise will be a kind of library.")}"
                         </p>
                         <footer className="flex items-center gap-4 pt-4">
                             <div className="h-px w-8 bg-purple-500/50"></div>
                             <div className="text-sm font-medium text-purple-200">
                                 Jorge Luis Borges
-                                <span className="block text-xs text-zinc-500 font-normal">Penulis & Penyair</span>
+                                {/* [TRANSLATE] */}
+                                <span className="block text-xs text-zinc-500 font-normal">{t("Writer & Poet")}</span>
                             </div>
                         </footer>
                     </blockquote>

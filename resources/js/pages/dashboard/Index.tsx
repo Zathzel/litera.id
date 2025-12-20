@@ -1,5 +1,7 @@
 import DashboardLayout from "@/layouts/dashboard/DashboardLayout";
 import { Link, usePage } from "@inertiajs/react";
+// 1. IMPORT HOOK
+import useTranslation from "@/hooks/UseTranslation"; 
 
 // --- TIPE DATA ---
 interface DashboardProps {
@@ -8,15 +10,13 @@ interface DashboardProps {
       id: number;
       name: string;
       email: string;
-      role: string; // Pastikan role ada di sini
+      role: string;
     };
   };
   stats?: {
-    // Stats Admin
     totalBooks?: number;
     totalCategories?: number;
     totalUsers?: number;
-    // Stats Reader (Bisa dikirim dari controller nanti)
     myBookmarks?: number;
     booksRead?: number;
   };
@@ -26,22 +26,27 @@ interface DashboardProps {
 export default function DashboardIndex() {
   const { auth, stats } = usePage<DashboardProps>().props;
   const isAdmin = auth.user.role === 'admin';
+  
+  // 2. PANGGIL HOOK
+  const { t } = useTranslation(); 
 
   // --- STATISTIK ---
-  // Gunakan optional chaining dan fallback value
   const stat1 = isAdmin ? (stats?.totalBooks ?? 0) : (stats?.myBookmarks ?? 0);
-  const stat1Label = isAdmin ? "Total Buku" : "Bookmark Saya";
+  // [TRANSLATE LABEL]
+  const stat1Label = isAdmin ? t("Total Books") : t("My Bookmarks");
   const stat1Icon = isAdmin ? "📚" : "🔖";
   const stat1Color = "indigo";
 
   const stat2 = isAdmin ? (stats?.totalCategories ?? 0) : (stats?.booksRead ?? 0);
-  const stat2Label = isAdmin ? "Total Kategori" : "Buku Selesai";
+  // [TRANSLATE LABEL]
+  const stat2Label = isAdmin ? t("Total Categories") : t("Books Finished");
   const stat2Icon = isAdmin ? "📂" : "✅";
   const stat2Color = "purple";
 
-  // Card ke-3 (Info User / Total User)
-  const stat3Label = isAdmin ? "Total Pengguna" : "Status Akun";
-  const stat3Value = isAdmin ? (stats?.totalUsers ?? 0) : "Active Reader";
+  // Card ke-3
+  // [TRANSLATE LABEL]
+  const stat3Label = isAdmin ? t("Total Users") : t("Account Status");
+  const stat3Value = isAdmin ? (stats?.totalUsers ?? 0) : "Active Reader"; // "Active Reader" biarkan Inggris atau translate manual jika mau
   const stat3Icon = isAdmin ? "👥" : "👤";
   const stat3Color = "pink";
 
@@ -55,12 +60,13 @@ export default function DashboardIndex() {
       }`}>
         <div className="relative z-10">
           <h1 className="text-3xl font-extrabold mb-2">
-            Halo, {auth.user.name}! 👋
+            {t("Hello")}, {auth.user.name}! 👋
           </h1>
           <p className="text-white/90 text-lg max-w-2xl">
+            {/* [TRANSLATE MESSAGE] */}
             {isAdmin 
-                ? "Selamat datang di Panel Admin. Kelola perpustakaan digital Anda dengan mudah di sini."
-                : "Selamat datang kembali! Lanjutkan petualangan membaca Anda dan temukan buku baru hari ini."
+                ? t("Welcome to the Admin Panel. Manage your digital library easily here.")
+                : t("Welcome back! Continue your reading adventure and discover new books today.")
             }
           </p>
         </div>
@@ -112,9 +118,10 @@ export default function DashboardIndex() {
         </div>
       </div>
 
-      {/* --- QUICK ACTIONS (Admin) / RECENT & LIBRARY (User) --- */}
+      {/* --- QUICK ACTIONS / RECENT --- */}
       <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-        {isAdmin ? "🚀 Aksi Cepat" : "📚 Mulai Membaca"}
+        {/* [TRANSLATE TITLE] */}
+        {isAdmin ? `🚀 ${t("Quick Actions")}` : `📚 ${t("Start Reading")}`}
       </h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -128,8 +135,8 @@ export default function DashboardIndex() {
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-xl">📖</div>
                         <div className="text-left">
-                            <h4 className="font-semibold text-gray-800 dark:text-gray-200 group-hover:text-indigo-600 transition-colors">Tambah Buku Baru</h4>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Upload PDF ke koleksi</p>
+                            <h4 className="font-semibold text-gray-800 dark:text-gray-200 group-hover:text-indigo-600 transition-colors">{t("Add New Book")}</h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{t("Upload PDF to collection")}</p>
                         </div>
                     </div>
                     <span className="text-gray-400 group-hover:translate-x-1 transition-transform">→</span>
@@ -142,8 +149,8 @@ export default function DashboardIndex() {
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/50 flex items-center justify-center text-xl">👥</div>
                         <div className="text-left">
-                            <h4 className="font-semibold text-gray-800 dark:text-gray-200 group-hover:text-pink-600 transition-colors">Kelola Pengguna</h4>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Lihat daftar member</p>
+                            <h4 className="font-semibold text-gray-800 dark:text-gray-200 group-hover:text-pink-600 transition-colors">{t("Manage Users")}</h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{t("View member list")}</p>
                         </div>
                     </div>
                     <span className="text-gray-400 group-hover:translate-x-1 transition-transform">→</span>
@@ -159,8 +166,8 @@ export default function DashboardIndex() {
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-xl">🔖</div>
                         <div className="text-left">
-                            <h4 className="font-semibold text-gray-800 dark:text-gray-200 group-hover:text-emerald-600 transition-colors">Perpustakaan Saya</h4>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Lanjutkan bacaan tersimpan</p>
+                            <h4 className="font-semibold text-gray-800 dark:text-gray-200 group-hover:text-emerald-600 transition-colors">{t("My Library")}</h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{t("Continue saved readings")}</p>
                         </div>
                     </div>
                     <span className="text-gray-400 group-hover:translate-x-1 transition-transform">→</span>
@@ -173,8 +180,8 @@ export default function DashboardIndex() {
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-teal-100 dark:bg-teal-900/50 flex items-center justify-center text-xl">🔍</div>
                         <div className="text-left">
-                            <h4 className="font-semibold text-gray-800 dark:text-gray-200 group-hover:text-teal-600 transition-colors">Jelajahi Buku</h4>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Temukan bacaan baru</p>
+                            <h4 className="font-semibold text-gray-800 dark:text-gray-200 group-hover:text-teal-600 transition-colors">{t("Browse Books")}</h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{t("Discover new reads")}</p>
                         </div>
                     </div>
                     <span className="text-gray-400 group-hover:translate-x-1 transition-transform">→</span>
